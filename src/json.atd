@@ -1,0 +1,4 @@
+ type json <ocaml module="Yojson.Safe"> = abstract
+  (* uses type Yojson.Safe.json,
+     with the functions Yojson.Safe.write_json
+     and Yojson.Safe.read_json *)
