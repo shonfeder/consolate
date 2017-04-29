@@ -5,12 +5,23 @@ type msg =
 
 type state = msg option * Model.t
 
-let next = let open Model in
+let advance dir = let open Model in
   function
-  | Multi slider  -> Multi (Slider.select_map select_fieldset slider)
+  | Multi slider  ->
+    let slider' =
+      Slider.(slider
+              |> select_map deselect_fieldset
+              |> dir
+              |> select_map select_fieldset)
+    in
+    Multi slider'
   | Mono fieldset -> Mono (select_fieldset fieldset)
 
+let next = advance Slider.fwd
+let prev = advance Slider.rwd
+
 let of_state = function
-  | (None, m) -> m
+  | (None, m)      -> m
   | (Some Next, m) -> next m
-  | (_,m)     -> m
+  | (Some Prev, m) -> prev m
+  | (_, m)         -> m

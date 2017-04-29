@@ -1,50 +1,35 @@
-type 'a t = T of 'a list * 'a * 'a list
-          | E
+type 'a t = 'a list * 'a * 'a list
 
-let empty = E
-let is_empty = function
-  | E -> true
-  | _ -> false
+exception From_empty
 
-let select = function
-  | E           -> None
-  | T (_, x, _) -> x
+let select (_, x, _) = x
 
-let fwd = function
-  | E ->
-    Some E
-  | T (_, _, []) ->
-    None
-  | T (front, x, x'::back) ->
-    Some (T (x::front, x', back))
+(* If we get to the end, we cannot advance further in either direction. *)
+let fwd slider = match slider with
+  | (_, _, []) ->
+    slider
+  | (front,    x,  x'::back) ->
+    (x::front, x', back)
 
-let rwd = function
-  | E ->
-    Some E
-  | T ([], _, _) ->
-    None
-  | T (x'::front, x, back) ->
-    Some (T (front, x', x::back))
+let rwd slider = match slider with
+  | ([], _, _) ->
+    slider
+  | (x'::front, x, back) ->
+    (front, x', x::back)
 
-let select_map f = function
-  | E -> E
-  | T (front, x, back) ->
-    T (front, f x, back)
+let select_map f (front, x, back) = (front, f x, back)
 
-let map f = function
-  | E -> E
-  | T (front, x, back) ->
-    T (List.map f front, f x, List.map f back)
+let map f (front, x, back) = (List.map f front, f x, List.map f back)
 
 let of_list = function
-  | []    -> E
-  | x::xs -> T ([], x, xs)
+  | []      -> raise From_empty
+  | (x::xs) -> ([], x, xs)
 
-let to_list = function
-  | E -> []
-  | T (front, x, back) -> (List.rev front) @ (x :: back)
+let to_list (front, x, back) =
+  (List.rev front) @ (x :: back)
 
-let fold_left f init slider = slider
-                              |> to_list
-                              |> List.fold_left f init
-                              |> of_list
+let fold_left f init slider =
+  slider
+  |> to_list
+  |> List.fold_left f init
+  |> of_list
