@@ -5,7 +5,7 @@ exception Invalid_config
 type state =
   | Selected
   | Editing
-  | Display
+  | Displayed
 
 type value =
   | Fieldset of field Slider.t
@@ -26,13 +26,37 @@ type t =
   | Multi of fieldset Slider.t
   | Mono  of fieldset
 
+let is_selected = function
+  | {state = Selected} -> true
+  | _ -> false
+let is_editing = function
+  | {state = Editing} -> true
+  | _ -> false
+let is_displayed = function
+  | {state = Displayed} -> true
+  | _ -> false
+
 let select   field = {field with state = Selected}
 let edit     field = {field with state = Editing}
-let deselect field = {field with state = Display}
+let deselect field = {field with state = Displayed}
 
+let fieldset_is_selected = function
+  | (Selected, _) -> true
+  | _ -> false
+let fieldset_is_editing = function
+  | (Editing, _) -> true
+  | _ -> false
+let fieldset_is_displayed = function
+  | (Displayed, _) -> true
+  | _ -> false
+
+(* TODO Make functions total by improving the type system *)
 let select_fieldset   (state, fieldset) = (Selected, fieldset)
-let edit_fieldset     (state, fieldset) = (Editing, fieldset)
-let deselect_fieldset (state, fieldset) = (Display, fieldset)
+let deselect_fieldset (state, fieldset) = (Displayed, fieldset)
+let edit_fieldset     = function
+  | (state, Fieldset fieldset) ->
+    (Editing, Fieldset (Slider.select_map select fieldset))
+  | (state, _) -> raise Invalid_config
 
 let rec of_value = function
   | `Assoc a  -> of_assoc a
@@ -42,23 +66,19 @@ let rec of_value = function
   | `List l   -> List (List.map of_value l)
   | `String s -> Str s
   | `Null     -> Null
-  | _         -> Null (* XXX *)
-(* | `Tuple  t -> of_assoc t *)
-(*   (\* |  -> of_string string *\) *)
-(*   (\* | `Variant of string * json option *\) *)
-(*   (\* | `Floatlit str  -> I.string float_style str *\) *)
+  | _         -> raise Invalid_config
 and of_assoc assoc =
   let to_field (label, json) =
     { label
     ; value = of_value json
-    ; state = Display }
+    ; state = Displayed }
   in
   Fieldset (List.map to_field assoc
             |> Slider.of_list)
 
 (* A valid config is a field set, or a list of fieldsets *)
 let rec of_json : json -> t =
-  let deselected fieldset = (Display, of_value fieldset)
+  let deselected fieldset = (Displayed, of_value fieldset)
   in
   function
   | `List fieldsets ->

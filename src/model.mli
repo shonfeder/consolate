@@ -16,7 +16,7 @@ open Json_t
 type state =
   | Selected
   | Editing
-  | Display
+  | Displayed
 
 type value =
   | Fieldset of field Slider.t

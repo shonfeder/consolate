@@ -18,9 +18,9 @@ let label_length f = String.length M.(f.label)
     In all following functions `s` = "state".
 *)
 let bg_of_state = function
-  | M.Display  -> A.(bg black)
-  | M.Selected -> A.(bg (rgb 0 0 5))
-  | M.Editing  -> A.(bg (rgb 4 5 4))
+  | M.Displayed -> A.(bg black)
+  | M.Selected  -> A.(bg (rgb 0 0 5))
+  | M.Editing   -> A.(bg (rgb 4 5 4))
 
 let default_style s = A.(fg white       ++ bg_of_state s)
 let error_style s   = A.(fg red         ++ bg_of_state s)
@@ -31,9 +31,9 @@ let null_style s    = A.(fg (rgb 0 1 0) ++ bg_of_state s)
 let str_style s     = A.(fg (rgb 0 3 1) ++ bg_of_state s)
 
 let lable_bg_of_state = function
-  | M.Display  -> A.(bg (gray 3))
-  | M.Selected -> A.(bg (rgb 0 0 5))
-  | M.Editing  -> A.(bg (rgb 4 5 4))
+  | M.Displayed -> A.(bg (gray 3))
+  | M.Selected  -> A.(bg (rgb 0 0 5))
+  | M.Editing   -> A.(bg (rgb 4 5 4))
 let label_style s = A.(st bold ++ lable_bg_of_state s)
 
 let of_bool s  = I.string (bool_style s) % function
