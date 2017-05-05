@@ -5,7 +5,7 @@ module M = Model
 module V = View
 module U = Update
 
-let json = Json_io.Load.file "src/data/example.json"
+let json = Json_io.Load.file "test/data/example.json"
 let init = (None, M.of_json json)
 
 (* let view  = V.of_model model *)
@@ -28,17 +28,14 @@ let init = (None, M.of_json json)
 (* update t (false, 1); *)
 (* Term.release t *)
 
-(* TODO Replace with maps to messages *)
 (* TODO Make reconfigurable bindings *)
-type ctl = Q | J | K | E | Noop
-
-let uchar_code_to_ctl code =
+let uchar_code_to_msg code =
   match Uchar.to_int code with
-  | 113 -> Q
-  | 106 -> J
-  | 107 -> K
-  | 101 -> E
-  | _   -> Noop
+  | 113 -> Some U.Quit
+  | 106 -> Some U.Next
+  | 107 -> Some U.Prev
+  | 101 -> Some U.Edit
+  | _   -> None
 
 let rec update term state =
   match state with
@@ -54,14 +51,7 @@ and loop term model =
   update term @@
   match Term.event term with
   | `Key (`Escape, _)     -> (Some U.Esc, model)
-  | `Key (`Uchar code, _) ->
-    (* TODO Refractor with code_to_msg : code -> U.msg *)
-    ( match uchar_code_to_ctl code with
-      | Q -> (Some U.Quit, model)
-      | J -> (Some U.Next, model)
-      | K -> (Some U.Prev, model)
-      | E -> (Some U.Edit, model)
-      | Noop -> (None, model) )
+  | `Key (`Uchar code, _) -> (uchar_code_to_msg code, model)
   | _ -> (None, model)
 
 let show_uchar c = Uchar.(to_int @@ of_char c)
