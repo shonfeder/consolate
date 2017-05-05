@@ -6,7 +6,7 @@ let version = "dev"
 let project = Project.lib project_name
     ~dir:"src"
     ~style:`Basic
-    ~pkg:project_name
+    (* ~pkg:project_name *)
     ~findlib_deps:
       ["atdgen";
        "batteries";
