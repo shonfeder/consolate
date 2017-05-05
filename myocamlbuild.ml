@@ -24,18 +24,11 @@ let include_home_init =
   then Printf.sprintf "#use \"%s\";;" home_init
   else ""
 
-(* let run_make_on_load = *)
-(* "let return_code = *)
-   (*   try Sys.command \"make\" *)
-   (*   with Sys_error msg -> print_endline msg ; 1 *)
-   (* ;;" *)
-
 let load_confirmation =
   Printf.sprintf "print_endline \"\\n-- %s .ocamlinit loaded successfully\n\";;" project_name
 
 let ocamlinit_postfix =
   [include_home_init;
-   (* run_make_on_load; *)
    load_confirmation]
 
 let () = Project.basic1 ~project_name ~version [project]
