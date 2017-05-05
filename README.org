@@ -1,0 +1,31 @@
+#+TITLE: Consolate
+
+#+BEGIN_QUOTE
+*consolate (v.)*
+    late 15c., from Latin /consolatus/, past participle of /consolari/ ...;
+    obsolete and replaced by [[http://www.etymonline.com/index.php?term=console][console]] (v.).
+
+*console (v.)*
+    1690s, from French /consoler/ "to comfort, console," from Latin /consolari/
+    "offer solace, encourage, comfort, cheer"...
+
+— [[http://www.etymonline.com/index.php?term=console][Etymonline]]
+#+END_QUOTE
+
+* Currently
+
+** Generally
+
+   - Experimental utilities to console operators of consoles.
+   - A study in the design of terminal applications.
+   - A study of [[https://github.com/pqwy/notty][Notty]], the OCaml library for declarative terminal graphics.
+
+** Specifically
+
+   - A terminal application that treats JSON files as config files and
+     facilitates structured, easy, safe editing of values without risk to the
+     syntax or semantics of the configuration framework. In early development.
+
+* Eventually?
+
+  - Robust, minimal utilities to console operators of consoles.
