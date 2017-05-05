@@ -58,9 +58,17 @@ let edit = function
   | Multi slider   -> Multi Slider.(select_map edit_fieldset slider)
   | Mono  fieldset -> Mono (edit_fieldset fieldset)
 
+let esc_fieldset fieldset = raise Unimplemented
+
+let esc model = match model with
+  | Mono (Displayed, _)  -> model
+  | Multi slider         -> Multi Slider.(select_map esc_fieldset slider)
+  | Mono fieldset        -> Mono (esc_fieldset fieldset)
+
 let of_state = function
   | (None, m)      -> m
   | (Some Next, m) -> next m
   | (Some Prev, m) -> prev m
   | (Some Edit, m) -> edit m
+  | (Some Esc,  m) -> esc m
   | (_, m)         -> m
