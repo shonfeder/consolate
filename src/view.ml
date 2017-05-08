@@ -50,6 +50,7 @@ let of_label s w str =
   I.(label <|> colon)
 
 let rec of_value s = function
+  | M.Config fss  -> of_config fss
   | M.Fieldset fs -> of_fieldset s fs
   | M.Bool b      -> of_bool s b
   | M.Float f     -> of_float s f
@@ -80,9 +81,9 @@ and of_fieldset s fieldset =
   let of_field f = I.(of_label f.label <|> of_value f.state f.value)
   in
   I.pad ~t:1 ~l:4 @@ stack of_field @@ Slider.to_list fieldset
+and of_config fieldsets =
+  let value_of_fieldset (state, fieldset) = of_fieldset state fieldset
+  in
+  fieldsets |> Slider.to_list |> stack value_of_fieldset
 
-let of_model : Model.t -> Notty.image =
-  let value_of_fieldset (state, fieldset) = of_value state fieldset in
-  function
-  | M.Multi fieldsets -> stack value_of_fieldset @@ Slider.to_list fieldsets
-  | M.Mono fieldset   -> value_of_fieldset fieldset
+let of_model : Model.t -> Notty.image = of_value Model.Displayed

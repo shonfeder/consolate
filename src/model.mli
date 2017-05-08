@@ -19,7 +19,8 @@ type state =
   | Displayed
 
 type value =
-  | Fieldset of field Slider.t
+  | Config   of fieldsets
+  | Fieldset of fields
   | Bool     of bool
   | Float    of float
   | Int      of int
@@ -30,13 +31,14 @@ and field =
   { label : string
   ; value : value
   ; state : state }
+and fields =
+  field Slider.t
+and fieldset =
+  state * fields
+and fieldsets =
+  fieldset Slider.t
 
-(* value should always be a Fieldset *)
-type fieldset = state * value
-
-type t =
-  | Multi of fieldset Slider.t
-  | Mono  of fieldset
+type t = value
 
 val select   : field -> field
 val edit     : field -> field
