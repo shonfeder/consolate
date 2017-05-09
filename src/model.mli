@@ -40,13 +40,13 @@ and fieldsets =
 
 type t = value
 
-val select   : field -> field
-val edit     : field -> field
-val deselect : field -> field
+val is_selected  : field -> bool
+val is_editing   : field -> bool
+val is_displayed : field -> bool
 
-val select_fieldset   : fieldset -> fieldset
-val edit_fieldset     : fieldset -> fieldset
-val deselect_fieldset : fieldset -> fieldset
+val fieldset_is_selected  : fieldset -> bool
+val fieldset_is_editing   : fieldset -> bool
+val fieldset_is_displayed : fieldset -> bool
 
 val of_json : json -> t
 val to_json : t    -> json
