@@ -18,11 +18,16 @@ let rwd slider = match slider with
   | (x'::front, x, back) ->
     (front, x', x::back)
 
+let reset (front, x, back) =
+  match List.rev front with
+  | [] ->
+    (front, x, back)
+  | (y::front') ->
+    ([], y, front' @ (x::back))
+
 let select_map f (front, x, back) = (front, f x, back)
 
 let map f (front, x, back) = (List.map f front, f x, List.map f back)
-
-(* let replace_selected y slider = select_map (fun _ -> y) slider *)
 
 let of_list = function
   | []      -> raise From_empty
