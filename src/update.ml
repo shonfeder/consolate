@@ -11,6 +11,27 @@ exception Unimplemented
 
 type dir = Fwd | Rwd
 
+let select   field = {field with state = Selected}
+let edit     field = {field with state = Editing}
+let deselect field =
+  match field.state with
+  | Selected | Displayed -> {field with state = Displayed}
+  | Editing              -> {field with state = Selected}
+
+let select_fieldset (state, fieldset) = (Selected, fieldset)
+let edit_fieldset (state, fieldset) =
+  match state with
+  | Displayed -> (Displayed, fieldset) (* What should this do? *)
+  | Selected  -> (Editing, (Slider.select_map select fieldset))
+  | Editing   -> (Editing, (Slider.select_map edit fieldset))
+let deselect_fieldset (state, fieldset) =
+  match state with
+  | Selected | Displayed -> (Displayed, Slider.reset fieldset)
+  | Editing ->
+    if is_editing (Slider.select fieldset)
+    then (Editing,  (Slider.select_map deselect fieldset))
+    else (Selected, (Slider.select_map deselect fieldset))
+
 (* let advance_field dir = match field with *)
 (*   | {state = Editing}  -> {field with fields = advance_value field.fields} *)
 (*   | {state = Selected} -> *)
@@ -43,7 +64,6 @@ let advance_fieldsets dir (fieldsets : fieldsets) : fieldsets =
   | (_, _) ->
     advance_slider dir deselect_fieldset select_fieldset fieldsets
 
-
 let advance dir = function
   | Config fieldsets -> Config (advance_fieldsets dir fieldsets)
   | _ -> raise Unimplemented
@@ -52,13 +72,18 @@ let next = advance Fwd
 let prev = advance Rwd
 
 let edit = function
-  | Config slider   -> Config Slider.(select_map edit_fieldset slider)
+  | Config slider -> Config Slider.(select_map edit_fieldset slider)
   | _ -> raise Unimplemented
 
-let esc_fieldset fieldset = raise Unimplemented
+let esc_fieldset fieldset = deselect_fieldset fieldset
 
 let esc model = match model with
-  | Config slider -> Config Slider.(select_map esc_fieldset slider)
+  | Config slider ->
+    if fieldset_is_selected (Slider.select slider)
+    then Config Slider.(slider
+                        |> select_map deselect_fieldset
+                        |> reset)
+    else Config Slider.(select_map esc_fieldset slider)
   | _ -> raise Unimplemented
 
 let of_state : state -> Model.t = function
@@ -66,5 +91,5 @@ let of_state : state -> Model.t = function
   | (Some Next, m) -> next m
   | (Some Prev, m) -> prev m
   | (Some Edit, m) -> edit m
-  (* | (Some Esc,  m) -> esc m *)
+  | (Some Esc,  m) -> esc m
   | (_, m)         -> m

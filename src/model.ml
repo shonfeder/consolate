@@ -41,10 +41,6 @@ let is_displayed = function
   | {state = Displayed} -> true
   | _ -> false
 
-let select   field = {field with state = Selected}
-let edit     field = {field with state = Editing}
-let deselect field = {field with state = Displayed}
-
 let fieldset_is_selected = function
   | (Selected, _) -> true
   | _ -> false
@@ -54,14 +50,6 @@ let fieldset_is_editing = function
 let fieldset_is_displayed = function
   | (Displayed, _) -> true
   | _ -> false
-
-let select_fieldset   (state, fieldset) = (Selected, fieldset)
-let deselect_fieldset (state, fieldset) =
-  match state with
-  | Selected | Displayed -> (Displayed, fieldset)
-  | Editing              -> (Selected, fieldset)
-let edit_fieldset     (state, fieldset) =
-  (Editing, (Slider.select_map select fieldset))
 
 let rec of_value = function
   | `Assoc a  -> Fieldset (of_assoc a)
@@ -78,7 +66,8 @@ and of_assoc assoc =
     ; value = of_value json
     ; state = Displayed }
   in
-  List.map to_field assoc
+  assoc
+  |> List.map to_field
   |> Slider.of_list
 
 let of_assoc_exn = function
@@ -88,6 +77,8 @@ let of_assoc_exn = function
 (* A valid config is an object, or a list of objects *)
 let rec of_json : json -> t =
   let deselected fieldset = (Displayed, fieldset) in
+  let select_fieldset (state, fieldset) = (Selected, fieldset) in
+  let select   field = {field with state = Selected} in
   function
   | `List fieldsets ->
     Config (fieldsets
@@ -95,11 +86,9 @@ let rec of_json : json -> t =
             |> Slider.of_list
             |> Slider.select_map select_fieldset)
   | `Assoc fieldset ->
-    Config ((Selected, of_assoc fieldset)
-           |> Slider.singleton )
-  (*   Mono (`Assoc fieldset *)
-  (*         |> deselected *)
-  (*         |> select_fieldset) *)
+    Fieldset (fieldset
+              |> of_assoc
+              |> Slider.select_map select)
   | _ ->
     raise Invalid_config
 
@@ -118,14 +107,3 @@ and to_assoc fieldset =
   `Assoc (fieldset |> Slider.to_list |> List.map to_pair)
 and from_fieldsets fieldsets =
   fieldsets |> Slider.to_list |> List.map snd |> List.map to_assoc
-
-
-(* let rec to_json : t -> json = *)
-(*   let from_fieldset (_, fieldset) = to_json fieldset *)
-(*   in *)
-(*   function *)
-(*   | Multi fieldsets -> `List (fieldsets *)
-(*                               |> Slider.to_list *)
-(*                               |> List.map from_fieldset) *)
-(*   | Mono  fieldset  -> from_fieldset fieldset *)
-
