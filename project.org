@@ -11,6 +11,7 @@ This is meant to be viewed in an environment that fully supports org-mode.
       - [ ] Begin editing label by pressing ~i~ (insert).
       - [ ] Edit label contents.
       - [ ] Return to normal mode with ~Esc~
+      - [ ] Selecting an item off screen should scroll the view port down.
 ***** Advanced
       - [ ] Jump to any field with home-row hints.
       - [ ] Undo/Redo
@@ -36,6 +37,10 @@ This is meant to be viewed in an environment that fully supports org-mode.
      CLOSED: [2017-04-15 Sat 09:22]
 **** DONE Presentation of select/edit
      CLOSED: [2017-04-15 Sat 09:22]
+*** TODO Configurable keys
+*** TODO Refactor to remove double-entry functions
+**** TODO Refactor ~Model.value~
+**** TODO Refactor the update functions
 *** TODO Style view
 **** DONE Initial styling for prototyping
      CLOSED: [2017-04-16 Sun 08:39]
