@@ -14,7 +14,7 @@ struct
   type t = Uchar.t Slider.t
 
   let init_spacer = Slider.singleton @@ Uchar.of_char ' '
-  let insert c chars = Slider.insert c chars
+  let insert c chars = Slider.insert c chars |> Slider.fwd
   (** Inserts are made to the right of the selected char *)
 
   let remove chars   =
@@ -24,7 +24,7 @@ struct
     then init_spacer
     else chars'
 
-  let bwd = Slider.rwd
+  let bwd = Slider.bwd
   let fwd = Slider.fwd
 
 end (* Model *)

@@ -48,7 +48,7 @@ let deselect_fieldset (state, fieldset) =
 let advance_slider dir unset set slider =
       let direction = match dir with
         | Fwd -> Slider.fwd
-        | Rwd -> Slider.rwd
+        | Rwd -> Slider.bwd
       in
       Slider.(slider
               |> select_map unset
