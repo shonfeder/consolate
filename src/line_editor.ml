@@ -3,17 +3,13 @@ open Notty_unix
 
 (* TODO Modularize so it can be used in other terminal apps *)
 
-exception Unimplemented
-
 module Model =
 struct
-  type position = int
-
   (** Chars is a slider (a zipper) of unicode chars.
       The selected item indicates the currently selected char.*)
   type t = Uchar.t Slider.t
 
-  let init_spacer = Slider.singleton @@ Uchar.of_char ' '
+  let init_spacer = Slider.singleton (Uchar.of_char ' ')
   let insert c chars = Slider.insert c chars |> Slider.fwd
   (** Inserts are made to the right of the selected char *)
 
@@ -26,22 +22,46 @@ struct
 
   let bwd = Slider.bwd
   let fwd = Slider.fwd
-
 end (* Model *)
 
-module Update =
+module Message =
 struct
-
-  type msg =
+  type t =
     | Esc
     | Code of Uchar.t
     | Del
     | Bwd
     | Fwd
 
-  type state = msg option * Model.t
+  let option_msg_of_arrow = function
+    | `Up | `Down -> None
+    | `Left  -> Some Bwd
+    | `Right -> Some Fwd
 
-  let model_from_msg model : msg -> Model.t = function
+  let option_msg_of_key = function
+    | `Escape     -> Some Esc
+    | `Uchar code -> Some (Code code)
+    | `Backspace  -> Some Del
+    | `Arrow dir  -> option_msg_of_arrow dir
+    | _           -> None
+
+  let of_event = function
+    | `Key (key, _) -> option_msg_of_key key
+    | _  -> None
+end (* Message *)
+
+module Update =
+struct
+  (** A blank space must always be at the end of the working model.
+      This provides a space for the cursor when it's at the end of
+      the line. *)
+  let init = Slider.singleton (Uchar.of_char ' ')
+
+  type state = Message.t option * Model.t
+
+  let model_from_msg model : Message.t -> Model.t =
+    let open Message in
+    function
     | Esc    -> model
     | Code c -> Model.insert c model
     | Del    -> model |> Model.bwd |> Model.remove |> Model.fwd
@@ -56,7 +76,6 @@ end (* Update *)
 
 module View =
 struct
-
   let of_uchar attr c = I.uchar attr c 1 1
 
   let of_model : Model.t -> Notty.image =
@@ -70,62 +89,3 @@ struct
     in
     I.(front <|> selected <|> back)
 end (* View *)
-
-module U = Update
-module M = Model
-module V = View
-
-let init = Slider.singleton (Uchar.of_char ' ')
-
-let option_msg_of_arrow = function
-  | `Up | `Down -> None
-  | `Left  -> Some U.Bwd
-  | `Right -> Some U.Fwd
-
-let option_msg_of_key = function
-  | `Escape     -> Some U.Esc
-  | `Uchar code -> Some U.(Code code)
-  | `Backspace  -> Some U.Del
-  | `Arrow dir  -> option_msg_of_arrow dir
-  | _           -> None
-
-let option_msg_of_event = function
-  | `Key (key, _) -> option_msg_of_key key
-  | _             -> None
-
-(* TODO modularize:
-   we need to be able to chain these loops together somehow..
-   or pass in a background image at least, then return control to the calling
-   module. *)
-
-(* module L *)
-(* let rec update_loop term state = *)
-(*   match state with *)
-(*   | (Some U.Esc, _) -> () *)
-(*   | (msg, model) -> *)
-(*     view_loop term @@ *)
-(*     U.of_state state *)
-
-(* TODO Lock this type down *)
-let update : 'a * Model.t -> Model.t =
-  fun (event, model) ->
-    let msg = option_msg_of_event event in
-    Update.of_state (msg, model)
-
-(* let rec view_loop term model = *)
-(*     let image = V.of_model model in *)
-(*     ( Term.image term image *)
-(*     ; event_loop term model ) *)
-let rec event_loop term model =
-  match Term.event term with
-  | `Key (`Escape, _) -> ()
-  | event ->
-    let model' = update (event, model) in
-    let image  = View.of_model model' in
-    ( Term.image term image
-    ; event_loop term model' )
-
-let run () =
-  let term = Term.create() in
-  ( event_loop term init
-  ; Term.release term)
