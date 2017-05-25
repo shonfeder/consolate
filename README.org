@@ -20,11 +20,15 @@
    - A study in the design of terminal applications.
    - A study of [[https://github.com/pqwy/notty][Notty]], the OCaml library for declarative terminal graphics.
 
+   The aim is to develop a deeply modular, declarative, extensible, suite for
+   developing terminal tools.
+
 ** Specifically
 
    - A terminal application that treats JSON files as config files and
      facilitates structured, easy, safe editing of values without risk to the
      syntax or semantics of the configuration framework. In early development.
+   - A simple line editor.
 
 * Eventually?
 
