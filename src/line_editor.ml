@@ -28,6 +28,7 @@ module Message =
 struct
   type t =
     | Esc
+    | Enter
     | Code of Uchar.t
     | Del
     | Bwd
@@ -40,6 +41,7 @@ struct
 
   let option_msg_of_key = function
     | `Escape     -> Some Esc
+    | `Enter      -> Some Enter
     | `Uchar code -> Some (Code code)
     | `Backspace  -> Some Del
     | `Arrow dir  -> option_msg_of_arrow dir
@@ -55,21 +57,23 @@ struct
   (** A blank space must always be at the end of the working model.
       This provides a space for the cursor when it's at the end of
       the line. *)
-  let init = Slider.singleton (Uchar.of_char ' ')
-
+  type return = (Model.t, Model.t option) result
   type state = Message.t option * Model.t
 
-  let model_from_msg model : Message.t -> Model.t =
+  let init = Slider.singleton (Uchar.of_char ' ')
+
+  let model_from_msg model : Message.t -> return =
     let open Message in
     function
-    | Esc    -> model
-    | Code c -> Model.insert c model
-    | Del    -> model |> Model.bwd |> Model.remove |> Model.fwd
-    | Bwd    -> Model.bwd model
-    | Fwd    -> Model.fwd model
+    | Esc    -> Error None
+    | Enter  -> Error (Some model)
+    | Code c -> Ok (Model.insert c model)
+    | Del    -> Ok (model |> Model.bwd |> Model.remove |> Model.fwd)
+    | Bwd    -> Ok (Model.bwd model)
+    | Fwd    -> Ok (Model.fwd model)
 
-  let of_state : state -> Model.t = function
-    | (None, model)     -> model
+  let of_state : state -> return = function
+    | (None, model)     -> Ok model
     | (Some msg, model) -> model_from_msg model msg
 
 end (* Update *)
