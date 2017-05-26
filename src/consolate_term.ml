@@ -27,18 +27,16 @@ end (* Term_Program *)
 module Loop (Program:Term_Program) =
 struct
 
-  open Program
-
   let update :
-    [ Unescape.event | `Resize of (int * int) | `End ] * Model.t
-    -> Model.t =
+    [ Unescape.event | `Resize of (int * int) | `End ] * Program.Model.t
+    -> Program.Model.t =
     fun (event, model) ->
-      let msg = Message.of_event event in
-      Update.of_state (msg, model)
+      let msg = Program.Message.of_event event in
+      Program.Update.of_state (msg, model)
 
-  let view : Notty.image -> Model.t -> Notty.image =
+  let view : Notty.image -> Program.Model.t -> Notty.image =
     fun bg model ->
-      I.(bg </> View.of_model model)
+      I.(bg </> Program.View.of_model model)
 
   let rec update_view_loop term bg model =
     match Term.event term with
@@ -51,6 +49,6 @@ struct
 
   let run () =
     let term = Term.create() in
-    ( update_view_loop term I.empty Update.init
+    ( update_view_loop term I.empty Program.Update.init
     ; Term.release term)
 end (* Loop *)
