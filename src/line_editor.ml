@@ -1,8 +1,6 @@
 open Notty
 open Notty_unix
 
-(* TODO Modularize so it can be used in other terminal apps *)
-
 module Model =
 struct
   (** Chars is a slider (a zipper) of unicode chars.
@@ -54,12 +52,12 @@ end (* Message *)
 
 module Update =
 struct
-  (** A blank space must always be at the end of the working model.
-      This provides a space for the cursor when it's at the end of
-      the line. *)
   type return = (Model.t, Model.t option) result
   type state = Message.t option * Model.t
 
+  (** A blank space must always be at the end of the working model.
+      This provides a space for the cursor when it's at the end of
+      the line. *)
   let init = Slider.singleton (Uchar.of_char ' ')
 
   let model_from_msg model : Message.t -> return =
@@ -68,7 +66,7 @@ struct
     | Esc    -> Error None
     | Enter  -> Error (Some model)
     | Code c -> Ok (Model.insert c model)
-    | Del    -> Ok (model |> Model.bwd |> Model.remove |> Model.fwd)
+    | Del    -> Ok (model |> Model.bwd |> Model.remove)
     | Bwd    -> Ok (Model.bwd model)
     | Fwd    -> Ok (Model.fwd model)
 
@@ -80,12 +78,13 @@ end (* Update *)
 
 module View =
 struct
-  let of_uchar attr c = I.uchar attr c 1 1
+  let of_uchar attr c   = I.uchar attr c 1 1
+  let of_uchars cs = I.hcat @@ List.map (of_uchar A.empty) cs
 
   let of_model : Model.t -> Notty.image =
     fun model ->
-    let front = I.hcat @@ List.map (of_uchar A.empty) @@ Slider.front model in
-    let back  = I.hcat @@ List.map (of_uchar A.empty) @@ Slider.back model in
+    let front = of_uchars @@ Slider.front model in
+    let back  = of_uchars @@ Slider.back model in
     let selected = of_uchar A.(bg red) @@
       match Slider.select model with
       | None      -> Uchar.of_char ' '
