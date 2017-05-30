@@ -2,6 +2,7 @@ type 'a t
 
 val empty    : 'a t
 val is_empty : 'a t -> bool
+val at_last  : 'a t -> bool
 
 val singleton : 'a   -> 'a t
 val select    : 'a t -> 'a option
@@ -26,6 +27,7 @@ val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
 
 val insert : 'a -> 'a t -> 'a t
 (** [insert y slider] is a new slider with y inserted before the selection. *)
+(* val insert_ahead : 'a -> 'a t -> 'a t *)
 
 val remove : 'a t -> 'a t
 (** [remove slider] is a new slider with the selected element dropped.

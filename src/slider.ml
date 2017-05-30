@@ -1,5 +1,4 @@
-(** A slider is a zipper which cannot be unzipped (unless it's empty)
-    If there are elements, then one element must always be in focus.*)
+(** A slider is a zipper with some additional operations *)
 type 'a t = 'a list * 'a list
 
 exception From_empty
@@ -8,17 +7,17 @@ let empty = ([],[])
 let is_empty = function
   | ([],[]) -> true
   | _       -> false
+let at_last = function
+  | (_, [x]) -> true
+  | _       -> false
 
 let singleton x = ([], [x])
 let select = function
   | (_, x::_) -> Some x
   | (_, [])   -> None
-    (* A slider should never have an empty back, unless it's empty,
-       otherwise it would have elements but nothing selected. *)
 
-(* If we get to the end, we cannot advance further in either direction. *)
 let fwd slider = match slider with
-  | (_,[_]) | (_,[]) -> slider
+  | (_,[]) -> slider
   | (front, x::back) -> (x::front, back)
 
 let bwd slider = match slider with
@@ -29,7 +28,7 @@ let bwd slider = match slider with
 let reset (front, back) = ([], List.rev front @ back)
 
 let select_map f = function
-  | (_,[]) -> ([],[])
+  | (front,[])       -> (front,[])
   | (front, x::back) -> (front, (f x)::back)
 
 let map f (front, back) = (List.map f front, List.map f back)
@@ -41,15 +40,17 @@ let to_list (front, back) = (List.rev front) @ back
 let front (front, _)  = List.rev front
 let back = function
   | (_, x::back) -> back
-  | _ -> []
+  | _            -> []
 
 let fold_left f init slider =
   slider
   |> to_list
   |> List.fold_left f init
 
-let insert x (front, back) = (front, x::back)
+let insert x = function
+  | (front, [])   -> (front, [x])
+  | (front, back) -> (front, x::back)
 
 let remove = function
-  | (_, []) -> ([],[])
+  | (_, [])          -> ([],[])
   | (front, x::back) -> (front, back)
