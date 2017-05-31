@@ -15,19 +15,9 @@ struct
   struct
     type t = LE.Model.t Slider.t
 
-    (* Move fwd and bwd on the selected line. *)
-    let bwd  = Slider.select_map LE.Model.bwd
-    let fwd model =
-      if Slider.at_last model
-      then model
-      else Slider.select_map LE.Model.fwd model
-
     (* Select the next or prev line *)
     let prev = Slider.bwd
-    let next model =
-      if Slider.at_last model
-      then model
-      else Slider.fwd model
+    let next = Slider.fwd_till_last
   end
 
   module Message =
@@ -76,17 +66,16 @@ struct
       | Esc    -> Error None
       | Enter  -> Ok (model |> Slider.fwd |> Slider.insert empty_line)
       (* TODO Refactor *)
-      | Code c -> Ok (Slider.select_map (LE.Model.insert c) model)
-      | Del    -> Ok (Slider.select_map
-                        (fun m ->
-                           LE.(m
-                               |> Model.bwd
-                               |> Model.remove))
-                        model)
-      | Bwd    -> Ok (Model.bwd model)
-      | Fwd    -> Ok (Model.fwd model)
       | Next   -> Ok (Model.next model)
       | Prev   -> Ok (Model.prev model)
+      | Code c -> Ok (Slider.select_map (LE.Model.insert c) model)
+      | Del    -> Ok (Slider.select_map
+                        (fun m -> LE.(m
+                                      |> Model.bwd
+                                      |> Model.remove))
+                        model)
+      | Bwd    -> Ok (Slider.select_map LE.Model.bwd model)
+      | Fwd    -> Ok (Slider.select_map LE.Model.fwd model)
 
     let of_state : state -> return = function
       | (None, model)     -> Ok model

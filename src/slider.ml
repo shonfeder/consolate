@@ -24,6 +24,11 @@ let bwd slider = match slider with
   | ([], _)          -> slider
   | (x::front, back) -> (front, x::back)
 
+let fwd_till_last slider =
+      if at_last slider
+      then slider
+      else fwd slider
+
 (* TODO Test *)
 let reset (front, back) = ([], List.rev front @ back)
 

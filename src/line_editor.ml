@@ -19,7 +19,7 @@ struct
     else chars'
 
   let bwd = Slider.bwd
-  let fwd = Slider.fwd
+  let fwd = Slider.fwd_till_last
 end (* Model *)
 
 module Message =

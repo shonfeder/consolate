@@ -10,6 +10,8 @@ val select    : 'a t -> 'a option
 val fwd : 'a t -> 'a t
 val bwd : 'a t -> 'a t
 
+val fwd_till_last : 'a t -> 'a t
+
 val reset : 'a t -> 'a t
 
 val select_map : ('a -> 'a) -> 'a t -> 'a t
