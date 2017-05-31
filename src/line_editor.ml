@@ -52,8 +52,8 @@ end (* Message *)
 
 module Update =
 struct
+  type state  = Consolate_term.event * Model.t
   type return = (Model.t, Model.t option) result
-  type state = Message.t option * Model.t
 
   (** A blank space must always be at the end of the working model.
       This provides a space for the cursor when it's at the end of
@@ -70,16 +70,18 @@ struct
     | Bwd    -> Ok (Model.bwd model)
     | Fwd    -> Ok (Model.fwd model)
 
-  let of_state : state -> return = function
-    | (None, model)     -> Ok model
-    | (Some msg, model) -> model_from_msg model msg
+  let of_state : state -> return =
+    fun (event, model) ->
+      match Message.of_event event with
+      | None     -> Ok model
+      | Some msg -> model_from_msg model msg
 
 end (* Update *)
 
 module View =
 struct
-  let of_uchar attr c   = I.uchar attr c 1 1
-  let of_uchars cs = I.hcat @@ List.map (of_uchar A.empty) cs
+  let of_uchar attr c = I.uchar attr c 1 1
+  let of_uchars cs    = I.hcat @@ List.map (of_uchar A.empty) cs
 
   let of_model : Model.t -> Notty.image =
     fun model ->

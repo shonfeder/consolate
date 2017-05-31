@@ -53,8 +53,8 @@ struct
 
   module Update =
   struct
+    type state  = Consolate_term.event * Model.t
     type return = (Model.t, Model.t option) result
-    type state = Message.t option * Model.t
 
     let empty_line = LE.Update.init
 
@@ -77,9 +77,11 @@ struct
       | Bwd    -> Ok (Slider.select_map LE.Model.bwd model)
       | Fwd    -> Ok (Slider.select_map LE.Model.fwd model)
 
-    let of_state : state -> return = function
-      | (None, model)     -> Ok model
-      | (Some msg, model) -> model_from_msg model msg
+    let of_state : state -> return =
+      fun (event, model) ->
+        match Message.of_event event with
+        | None     -> Ok model
+        | Some msg -> model_from_msg model msg
 
   end (* Update *)
 
@@ -110,5 +112,5 @@ struct
 end (* Text_prog *)
 
 
-  module Line = Consolate_term.Loop(LE)
-  module Text = Consolate_term.Loop(Text_prog)
+module Line = Consolate_term.Loop(LE)
+module Text = Consolate_term.Loop(Text_prog)
