@@ -1,7 +1,7 @@
 open Notty
 open Notty_unix
 
-module type Term_Program =
+module type Program =
 sig
   module Model : sig
     type t
@@ -26,21 +26,21 @@ sig
   module View : sig
     val of_model : Model.t -> Notty.image
   end
-end (* Term_Program *)
+end (* Program *)
 
-module Loop (Program:Term_Program) =
+module Loop (Prog:Program) =
 struct
 
   let update :
-    [ Unescape.event | `Resize of (int * int) | `End ] * Program.Model.t
-    -> Program.Update.return =
+    [ Unescape.event | `Resize of (int * int) | `End ] * Prog.Model.t
+    -> Prog.Update.return =
     fun (event, model) ->
-      let msg = Program.Message.of_event event in
-      Program.Update.of_state (msg, model)
+      let msg = Prog.Message.of_event event in
+      Prog.Update.of_state (msg, model)
 
-  let view : Notty.image -> Program.Model.t -> Notty.image =
+  let view : Notty.image -> Prog.Model.t -> Notty.image =
     fun bg model ->
-      I.(bg </> Program.View.of_model model)
+      I.(bg </> Prog.View.of_model model)
 
   let rec update_view_loop term bg model =
     match update (Term.event term, model) with
@@ -52,7 +52,7 @@ struct
 
   let run () =
     let term = Term.create() in
-    let return = update_view_loop term I.empty Program.Update.init in
+    let return = update_view_loop term I.empty Prog.Update.init in
     ( Term.release term
     ; return )
 end (* Loop *)
