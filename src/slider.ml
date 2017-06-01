@@ -56,6 +56,10 @@ let insert x = function
   | (front, [])   -> (front, [x])
   | (front, back) -> (front, x::back)
 
+let replace x = function
+  | (front, [])      -> (front, [x])
+  | (front, y::back) -> (front, x::back)
+
 let remove = function
   | (_, [])          -> ([],[])
   | (front, x::back) -> (front, back)

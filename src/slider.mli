@@ -29,7 +29,9 @@ val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
 
 val insert : 'a -> 'a t -> 'a t
 (** [insert y slider] is a new slider with y inserted before the selection. *)
-(* val insert_ahead : 'a -> 'a t -> 'a t *)
+
+val replace : 'a -> 'a t -> 'a t
+(** [insert x slider] is a new slider with x replacing the selected. *)
 
 val remove : 'a t -> 'a t
 (** [remove slider] is a new slider with the selected element dropped.
