@@ -13,9 +13,9 @@ struct
     type t = LE.Model.t Slider.t
   end
 
-  module Muxing =
+  module Composing =
   struct
-    module Muxed = LE
+    module Component = LE
 
     let prev : Model.t -> Model.t = Slider.bwd
     let next : Model.t -> Model.t = Slider.fwd_till_last
@@ -75,10 +75,10 @@ struct
       let open Message in
       function
       | Esc    -> Error None
-      | Add    -> Ok (Muxing.add model)
-      | Remove -> Ok (Slider.remove model |> Muxing.prev)
-      | Next   -> Ok (Muxing.next model)
-      | Prev   -> Ok (Muxing.prev model)
+      | Add    -> Ok (Composing.add model)
+      | Remove -> Ok (Slider.remove model |> Composing.prev)
+      | Next   -> Ok (Composing.next model)
+      | Prev   -> Ok (Composing.prev model)
 
     let of_state : state -> return =
       fun (event, model) ->

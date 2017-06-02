@@ -11,22 +11,22 @@ open Notty_unix
 
    I'm not sure yet what this called... *)
 
-(** A Muxer is a Consolate_term.Program with functions for
+(** A Composer is a Consolate_term.Program with functions for
     advancing through the model to different foci *)
-module type Muxer =
+module type Composer =
 sig
   include Consolate_term.Program
 
-  module Muxing : sig
-    module Muxed : Consolate_term.Program
+  module Composing : sig
+    module Component : Consolate_term.Program
 
     (* TODO Remove these from the spec, since this isn't a multiplexer *)
     val prev : Model.t -> Model.t
     val next : Model.t -> Model.t
     val add  : Model.t -> Model.t
 
-    val selected : Model.t -> Muxed.Model.t option
-    val replace  : Muxed.Model.t -> Model.t -> Model.t
+    val selected : Model.t -> Component.Model.t option
+    val replace  : Component.Model.t -> Model.t -> Model.t
         (* Ok (Slider.replace selected' model) *)
   end
 
@@ -36,44 +36,44 @@ sig
   end
 end
 
-module Make (Muxer:Muxer) =
+module Make (Composer:Composer) =
 struct
 
-  module Muxing  = Muxer.Muxing
-  module Muxed   = Muxing.Muxed
-  module Message = Muxer.Message
+  open Composer
 
-  module Model   = Muxer.Model
-  module View    = Muxer.View
+  module Component  = Composing.Component
+  module Model   = Model
+  module View    = View
 
   module Update =
   struct
-    type state  = Muxer.Update.state
-    type return = Muxer.Update.return
+    type state  = Update.state
+    type return = Update.return
 
-    let init = Muxer.Update.init
+    let init = Update.init
 
     let muxed_result_of_event (event, model) =
-      match Muxing.selected model with
+      match Composing.selected model with
       | None          -> Ok model
       | Some selected ->
         let selected' =
-          match Muxed.Update.of_state (event, selected) with
+          match Component.Update.of_state (event, selected) with
             | Ok selected'           -> selected'
             | Error (Some selected') -> selected'
             | Error None             -> selected
         in
-        Ok (Muxing.replace selected' model)
+        Ok (Composing.replace selected' model)
 
     let of_state : state -> return =
       fun state ->
         match Message.of_state state with
-        | Some msg -> Muxer.Update.of_state state
+        | Some msg -> Composer.Update.of_state state
         | None     -> muxed_result_of_event state
   end (* Update *)
+
 end (* Make *)
 
-(** E.g., we can multiplex a line editor to implement an editor:
+(** E.g., we can compose a text editor by :
     module Line_editor_mux = Make(EditorProg)
     module Editor = Consolate_term.Loop(TmuxTest) *)
 
