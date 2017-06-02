@@ -1,53 +1,64 @@
-module LE = Line_editor
+(* module LE = Line_editor *)
 
 open Notty
 open Notty_unix
 
-(* TODO Refactor *)
 (* TODO Load from and save to file *)
-(* TODO Modularize:
-   - By creating a multiplexer interface?
-   - How to handle extensible commands from widgets? *)
 
-module Text_prog =
+module Prog (LE:Line_editor.T) =
 struct
+
   module Model =
   struct
     type t = LE.Model.t Slider.t
+  end
 
-    (* Select the next or prev line *)
-    let prev = Slider.bwd
-    let next = Slider.fwd_till_last
+  module Muxing =
+  struct
+    module Muxed = LE
+
+    let prev : Model.t -> Model.t = Slider.bwd
+    let next : Model.t -> Model.t = Slider.fwd_till_last
+    let add model = model |> Slider.fwd |> Slider.insert LE.Update.init
+
+    let selected : Model.t -> LE.Model.t option = Slider.select
+    let replace (replacement : LE.Model.t) : Model.t -> Model.t =
+      (Slider.replace replacement)
+
+    let muxed_of_state = LE.Update.of_state
   end
 
   module Message =
   struct
     type t =
       | Esc
-      | Enter
-      | Code of Uchar.t
-      | Del
-      | Bwd
-      | Fwd
+      | Add
+      | Remove
       | Next
       | Prev
 
     let option_msg_of_arrow = function
       | `Up    -> Some Prev
       | `Down  -> Some Next
-      | `Left  -> Some Bwd
-      | `Right -> Some Fwd
+      | _      -> None
 
-    let option_msg_of_key = function
+    let option_msg_of_key model = function
       | `Escape     -> Some Esc
-      | `Enter      -> Some Enter
-      | `Uchar code -> Some (Code code)
-      | `Backspace  -> Some Del
+      | `Enter      -> Some Add
+      | `Backspace  ->
+        (* TODO Refactor out *)
+        (match Slider.select model with
+         | None -> None
+         | Some line ->
+           if LE.Model.is_empty line
+           then Some Remove
+           else None)
       | `Arrow dir  -> option_msg_of_arrow dir
       | _           -> None
 
-    let of_event = function
-      | `Key (key, _) -> option_msg_of_key key
+    let of_state (event, model) =
+      match event with
+      | `Key (key, _) -> option_msg_of_key model key
       | _  -> None
   end (* Message *)
 
@@ -64,22 +75,14 @@ struct
       let open Message in
       function
       | Esc    -> Error None
-      | Enter  -> Ok (model |> Slider.fwd |> Slider.insert empty_line)
-      (* TODO Refactor *)
-      | Next   -> Ok (Model.next model)
-      | Prev   -> Ok (Model.prev model)
-      | Code c -> Ok (Slider.select_map (LE.Model.insert c) model)
-      | Del    -> Ok (Slider.select_map
-                        (fun m -> LE.(m
-                                      |> Model.bwd
-                                      |> Model.remove))
-                        model)
-      | Bwd    -> Ok (Slider.select_map LE.Model.bwd model)
-      | Fwd    -> Ok (Slider.select_map LE.Model.fwd model)
+      | Add    -> Ok (Muxing.add model)
+      | Remove -> Ok (Slider.remove model |> Muxing.prev)
+      | Next   -> Ok (Muxing.next model)
+      | Prev   -> Ok (Muxing.prev model)
 
     let of_state : state -> return =
       fun (event, model) ->
-        match Message.of_event event with
+        match Message.of_state (event, model) with
         | None     -> Ok model
         | Some msg -> model_from_msg model msg
 
@@ -90,9 +93,9 @@ struct
     let (%) = Batteries.(%) (* compose *)
 
     let of_model : Model.t -> Notty.image =
-      let of_unselected_lines model =
-        model
-        |> List.map (LE.View.of_uchars % Slider.to_list)
+      let of_unselected_lines line =
+        line
+        |> List.map (LE.View.of_uchars % LE.Model.to_chars)
         |> I.vcat
       in
       fun model ->
@@ -109,8 +112,4 @@ struct
            <->
            succeeding)
   end (* View *)
-end (* Text_prog *)
-
-
-module Line = Consolate_term.Loop(LE)
-module Text = Consolate_term.Loop(Text_prog)
+end (* Prog *)
