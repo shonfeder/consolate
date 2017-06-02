@@ -1,9 +1,8 @@
-(* module LE = Line_editor *)
-
 open Notty
 open Notty_unix
 
 (* TODO Load from and save to file *)
+(* TODO Change file name *)
 
 module Prog (LE:Line_editor.T) =
 struct
@@ -37,6 +36,16 @@ struct
       | Next
       | Prev
 
+    (* TODO Append remaining line to previous when cursor at beginning *)
+    let option_remove_of_model model =
+      let remove_if_empty line =
+        if LE.Model.is_empty line
+        then Some Remove
+        else None
+      in
+      let open BatOption.Infix in
+      Slider.select model >>= remove_if_empty
+
     let option_msg_of_arrow = function
       | `Up    -> Some Prev
       | `Down  -> Some Next
@@ -45,14 +54,7 @@ struct
     let option_msg_of_key model = function
       | `Escape     -> Some Esc
       | `Enter      -> Some Add
-      | `Backspace  ->
-        (* TODO Refactor out *)
-        (match Slider.select model with
-         | None -> None
-         | Some line ->
-           if LE.Model.is_empty line
-           then Some Remove
-           else None)
+      | `Backspace  -> option_remove_of_model model
       | `Arrow dir  -> option_msg_of_arrow dir
       | _           -> None
 
