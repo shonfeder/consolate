@@ -1,18 +1,10 @@
 open Notty
 open Notty_unix
 
-(* TODO Rename
+(* TODO Generalize to deal with multiple components *)
 
-   This hasn't ended up as a general multiplex constructor
-   It is, rather, a way of gluing together modular programs,
-   so that terminal events can be passed along to embedded programs,
-   and the embedded models can be updated and viewed
-   in the context of the containing program.
-
-   I'm not sure yet what this called... *)
-
-(** A Composer is a Consolate_term.Program with functions for
-    advancing through the model to different foci *)
+(** A Composer is a [Consolate_term.Program] that uses other
+    [Consolate_term.Program]s as components.  *)
 module type Composer =
 sig
   include Consolate_term.Program
@@ -73,9 +65,10 @@ struct
 
 end (* Make *)
 
-(** E.g., we can compose a text editor by :
-    module Line_editor_mux = Make(EditorProg)
-    module Editor = Consolate_term.Loop(TmuxTest) *)
+(** E.g., we can compose a text editor that uses a line editor as a component:
+    module Editor_composer = Editor(Line_editor)
+    module Editor_prog     = Make(Editor_composer)
+    module Editor = Consolate_term.Loop(Editor_prog) *)
 
 module EditorProg = Editor.Prog(Line_editor)
 module Line_editor_mux = Make (EditorProg)
