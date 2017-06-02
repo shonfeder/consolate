@@ -41,8 +41,19 @@ struct
     then init_spacer
     else chars'
 
+  let is_empty model =
+    match Slider.to_list model with
+    | []  -> true
+    | [c] -> Uchar.of_char ' ' = c
+    | _   -> false
+
+  let front = Slider.front
+  let back  = Slider.back
+
   let bwd = Slider.bwd
   let fwd = Slider.fwd_till_last
+
+  let to_chars = Slider.to_list
 end (* Model *)
 
 module Message =
