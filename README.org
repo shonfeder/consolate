@@ -25,10 +25,19 @@
 
 ** Specifically
 
+   The following features are in various stages of early development, and should
+   be considered landmarks in a proving ground:
+
+   - The ~Consolate_term~ module, providing the ~Loop~ functor, which is a
+     general interface to the Notty terminal event loop for any module
+     satisfying the ~Program~ interface.
+   - The ~Composition~ functor, facilitating the composition of complex programs
+     from simpler, independent components.
+   - A simple line editor.
+   - A simple text editor, implemented as a composer on the simple line editor.
    - A terminal application that treats JSON files as config files and
      facilitates structured, easy, safe editing of values without risk to the
      syntax or semantics of the configuration framework. In early development.
-   - A simple line editor.
 
 * Eventually?
 
