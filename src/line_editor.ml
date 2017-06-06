@@ -5,16 +5,25 @@ module type T =
 sig
   module Model : sig
     type t
+    val empty : t
     val is_empty : t -> bool
-    val to_chars : t -> Uchar.t list
+
+    val of_string : string -> t
+    val to_string : t -> string
+
+    val to_chars  : t -> Uchar.t list
+
     val front    : t -> Uchar.t list
     val back     : t -> Uchar.t list
+
+    val append   : t -> t -> t
   end
 
   module Update : sig
     type state  = Consolate_term.event * Model.t
     type return = (Model.t, Model.t option) result
     val init : Model.t
+    val load : string -> Model.t
     val of_state : state -> return
   end
 
@@ -23,6 +32,12 @@ sig
     val of_uchars : Uchar.t list -> Notty.image
   end
 end
+
+module Aux =
+struct
+  let drop_last list =
+    BatList.take (List.length list - 1) list
+end (* Aux *)
 
 module Model =
 struct
@@ -41,6 +56,7 @@ struct
     then init_spacer
     else chars'
 
+  let empty = Slider.empty
   let is_empty model =
     match Slider.to_list model with
     | []  -> true
@@ -53,7 +69,30 @@ struct
   let bwd = Slider.bwd
   let fwd = Slider.fwd_till_last
 
+  let of_string string =
+    (string ^ " ")
+    |> BatString.to_list
+    |> List.map Uchar.of_char
+    |> Slider.of_list
+  let to_string model =
+    model
+    |> Slider.to_list
+    |> Aux.drop_last
+    |> List.map Uchar.to_char
+    |> BatString.of_list
+
   let to_chars = Slider.to_list
+
+  let drop_last = function
+    | (front, [])   -> (Aux.drop_last front, [])
+    | (front, back) -> (front, Aux.drop_last back)
+
+  let append model =
+    model
+    |> drop_last (* Drop the spacer at the end of the first line *)
+    |> Slider.ffwd
+    |> Slider.append
+
 end (* Model *)
 
 module Message =
@@ -109,6 +148,8 @@ struct
       match Message.of_event event with
       | None     -> Ok model
       | Some msg -> model_from_msg model msg
+
+  let load : string -> Model.t = Model.of_string
 
 end (* Update *)
 
