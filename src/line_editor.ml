@@ -16,7 +16,8 @@ sig
     val front    : t -> Uchar.t list
     val back     : t -> Uchar.t list
 
-    val append   : t -> t -> t
+    val append : t -> t -> t
+    val split  : t -> t * t
   end
 
   module Update : sig
@@ -92,6 +93,15 @@ struct
     |> drop_last (* Drop the spacer at the end of the first line *)
     |> Slider.ffwd
     |> Slider.append
+
+  let split model =
+    let (front, back) = Slider.split model in
+    let spacer_if_empty slider =
+      if Slider.is_empty slider
+      then init_spacer
+      else slider
+    in
+    (Slider.append front init_spacer, spacer_if_empty back)
 
 end (* Model *)
 

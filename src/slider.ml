@@ -56,6 +56,10 @@ let back = function
   | (_, x::back) -> back
   | _            -> []
 
+let split = function
+  | ([], back)       -> (([],[]), ([],back))
+  | (x::front, back) -> ((front,[x]), ([],back))
+
 let fold_left f init slider =
   slider
   |> to_list

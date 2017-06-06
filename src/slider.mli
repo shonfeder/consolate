@@ -25,6 +25,9 @@ val to_list : 'a t    -> 'a list
 val front   : 'a t -> 'a list
 val back    : 'a t -> 'a list
 
+val split : 'a t -> 'a t * 'a t
+(** [split s] is a pair of sliders partitioning the front back of s *)
+
 val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
 
 (** {1:Slider modification} *)

@@ -13,7 +13,8 @@ sig
     val front    : t -> Uchar.t list
     val back     : t -> Uchar.t list
 
-    val append   : t -> t -> t
+    val append : t -> t -> t
+    val split  : t -> t * t
   end
 
   module Update : sig
