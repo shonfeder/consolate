@@ -10,6 +10,30 @@ struct
   module Model =
   struct
     type t = LE.Model.t Slider.t
+
+    let of_file : string -> t =
+      let add_line_to_slider slider line =
+        let model_of_line = LE.Model.of_string line in
+        Slider.insert model_of_line slider
+      in
+      fun file_name ->
+        file_name
+        |> BatFile.lines_of
+        |> BatEnum.fold add_line_to_slider Slider.empty
+
+    let to_file : string -> t -> unit =
+      fun file_name model ->
+        let oc = open_out file_name in
+        let write_line_to_file line =
+          line
+          |> LE.Model.to_string
+          |> Printf.fprintf oc "%s\n"
+        in
+        ( model
+          |> Slider.to_list
+          |> List.iter write_line_to_file
+        ; close_out oc )
+
   end
 
   module Composing =
@@ -30,21 +54,24 @@ struct
   module Message =
   struct
     type t =
-      | Esc
+      | Quit
       | Add
       | Remove
       | Next
       | Prev
+      (* TODO *)
+      (* | Menu *)
 
     (* TODO Append remaining line to previous when cursor at beginning *)
     let option_remove_of_model model =
-      let remove_if_empty line =
-        if LE.Model.is_empty line
+      let at_beginning line = (LE.Model.front line = []) in
+      let remove_if_at_beginning line =
+        if at_beginning line
         then Some Remove
         else None
       in
       let open BatOption.Infix in
-      Slider.select model >>= remove_if_empty
+      Slider.select model >>= remove_if_at_beginning
 
     let option_msg_of_arrow = function
       | `Up    -> Some Prev
@@ -52,7 +79,7 @@ struct
       | _      -> None
 
     let option_msg_of_key model = function
-      | `Escape     -> Some Esc
+      | `Escape     -> Some Quit
       | `Enter      -> Some Add
       | `Backspace  -> option_remove_of_model model
       | `Arrow dir  -> option_msg_of_arrow dir
@@ -73,12 +100,26 @@ struct
 
     let init = Slider.singleton empty_line
 
+    let remove_line model =
+      let removed_line =
+        match Slider.select model with
+        | None      -> LE.Model.empty
+        | Some line -> line
+      in
+      let append_removed_line =
+        Slider.select_map (fun line -> LE.Model.append line removed_line)
+      in
+      model
+      |> Slider.remove
+      |> Composing.prev
+      |> append_removed_line
+
     let model_from_msg model : Message.t -> return =
       let open Message in
       function
-      | Esc    -> Error None
+      | Quit    -> Error None
       | Add    -> Ok (Composing.add model)
-      | Remove -> Ok (Slider.remove model |> Composing.prev)
+      | Remove -> Ok (remove_line model)
       | Next   -> Ok (Composing.next model)
       | Prev   -> Ok (Composing.prev model)
 
@@ -87,6 +128,9 @@ struct
         match Message.of_state (event, model) with
         | None     -> Ok model
         | Some msg -> model_from_msg model msg
+
+    let load : string -> Model.t = Model.of_file
+
 
   end (* Update *)
 
