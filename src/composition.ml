@@ -33,7 +33,7 @@ struct
 
   open Composer
 
-  module Component  = Composing.Component
+  module Component = Composing.Component
   module Model   = Model
   module View    = View
 
@@ -61,6 +61,9 @@ struct
         match Message.of_state state with
         | Some msg -> Composer.Update.of_state state
         | None     -> muxed_result_of_event state
+
+    let load : string -> Model.t = Composer.Update.load
+
   end (* Update *)
 
 end (* Make *)
@@ -69,7 +72,3 @@ end (* Make *)
     module Editor_composer = Editor(Line_editor)
     module Editor_prog     = Make(Editor_composer)
     module Editor = Consolate_term.Loop(Editor_prog) *)
-
-module EditorProg = Editor.Prog(Line_editor)
-module Line_editor_mux = Make (EditorProg)
-module Editor = Consolate_term.Loop(Line_editor_mux)
