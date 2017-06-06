@@ -25,6 +25,14 @@ let bwd slider = match slider with
   | ([], _)          -> slider
   | (x::front, back) -> (front, x::back)
 
+let rec ffwd slider = match slider with
+  | (_,[])           -> slider
+  | (front, x::back) -> ffwd (x::front, back)
+
+let rec fbwd slider = match slider with
+  | ([],_)           -> slider
+  | (x::front, back) -> fbwd (front, x::back)
+
 let fwd_till_last slider =
       if at_last slider
       then slider
@@ -64,3 +72,6 @@ let replace x = function
 let remove = function
   | (_, [])          -> ([],[])
   | (front, x::back) -> (front, back)
+
+let append (front, back) appending =
+  (front, back @ to_list appending)

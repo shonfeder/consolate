@@ -1,4 +1,4 @@
-type 'a t
+type 'a t = 'a list * 'a list
 
 val empty    : 'a t
 val is_empty : 'a t -> bool
@@ -9,6 +9,8 @@ val select    : 'a t -> 'a option
 
 val fwd : 'a t -> 'a t
 val bwd : 'a t -> 'a t
+val ffwd : 'a t -> 'a t
+val fbwd : 'a t -> 'a t
 
 val fwd_till_last : 'a t -> 'a t
 
@@ -39,3 +41,5 @@ val remove : 'a t -> 'a t
     The previous item is selected if there are items in front of the slider.
     The next item is selected, if the front is empty.
     An empty slider results from removing the last item in a slider. *)
+
+val append : 'a t -> 'a t -> 'a t
