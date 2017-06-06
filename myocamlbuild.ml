@@ -10,6 +10,8 @@ let project = Project.lib project_name
     ~findlib_deps:
       ["atdgen";
        "batteries";
+       "ppx_deriving";
+       "ppx_deriving.std";
        "calendar";
        "extlib";
        "fileutils";

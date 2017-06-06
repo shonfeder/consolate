@@ -1,5 +1,6 @@
 (** A slider is a zipper with some additional operations *)
 type 'a t = 'a list * 'a list
+[@@deriving show]
 
 exception From_empty
 
