@@ -39,16 +39,9 @@ struct
   module Composing =
   struct
     module Component = LE
-
-    let prev : Model.t -> Model.t = Slider.bwd
-    let next : Model.t -> Model.t = Slider.fwd_till_last
-    let add model = model |> Slider.fwd |> Slider.insert LE.Update.init
-
     let selected : Model.t -> LE.Model.t option = Slider.select
     let replace (replacement : LE.Model.t) : Model.t -> Model.t =
       (Slider.replace replacement)
-
-    let muxed_of_state = LE.Update.of_state
   end
 
   module Message =

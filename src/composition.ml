@@ -11,15 +11,8 @@ sig
 
   module Composing : sig
     module Component : Consolate_term.Program
-
-    (* TODO Remove these from the spec, since this isn't a multiplexer *)
-    val prev : Model.t -> Model.t
-    val next : Model.t -> Model.t
-    val add  : Model.t -> Model.t
-
     val selected : Model.t -> Component.Model.t option
     val replace  : Component.Model.t -> Model.t -> Model.t
-        (* Ok (Slider.replace selected' model) *)
   end
 
   module Message : sig
