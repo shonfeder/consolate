@@ -93,28 +93,45 @@ struct
 
     let init = Slider.singleton empty_line
 
-    let remove_line model =
+    let prev : Model.t -> Model.t = Slider.bwd
+    let next : Model.t -> Model.t = Slider.fwd_till_last
+
+    let append_to_selected_line line model =
+      Slider.select_map (fun selected -> LE.Model.append selected line) model
+
+    let add model =
+      let (front, back) =
+        let line = Slider.select model in
+        Option.default LE.Update.init line
+        |> LE.Model.split
+      in
+      model
+      |> Slider.replace front
+      |> Slider.fwd
+      |> Slider.insert back
+
+    let remove model =
       let removed_line =
         match Slider.select model with
         | None      -> LE.Model.empty
         | Some line -> line
       in
       let append_removed_line =
-        Slider.select_map (fun line -> LE.Model.append line removed_line)
+        append_to_selected_line removed_line
       in
       model
       |> Slider.remove
-      |> Composing.prev
+      |> prev
       |> append_removed_line
 
     let model_from_msg model : Message.t -> return =
       let open Message in
       function
       | Quit    -> Error None
-      | Add    -> Ok (Composing.add model)
-      | Remove -> Ok (remove_line model)
-      | Next   -> Ok (Composing.next model)
-      | Prev   -> Ok (Composing.prev model)
+      | Add    -> Ok (add model)
+      | Remove -> Ok (remove model)
+      | Next   -> Ok (next model)
+      | Prev   -> Ok (prev model)
 
     let of_state : state -> return =
       fun (event, model) ->
