@@ -16,6 +16,7 @@ sig
         [Error] means the input should terminate, and the
         optional value returned*)
     val init : Model.t
+    val load : string -> Model.t
     val of_state : state -> return
   end
 
@@ -30,17 +31,21 @@ struct
   module Update = Prog.Update
   module View   = Prog.View
 
-  let rec update_view_loop term bg model =
+  let rec view_update_loop term bg model =
+    let _ = View.of_model model |> Term.image term in
     let state = (Term.event term, model) in
     match Update.of_state state with
     | Error ret -> ret
-    | Ok model' ->
-      ( View.of_model model' |> Term.image term
-      ; update_view_loop term bg model' )
+    | Ok model' -> view_update_loop term bg model'
 
-  let run () =
+  let run_from_init init =
     let term = Term.create() in
-    let return = update_view_loop term I.empty Update.init in
+    let return = view_update_loop term I.empty init in
     ( Term.release term
     ; return )
+
+  let run () = run_from_init Update.init
+
+  let load string = string |> Update.load |> run_from_init
+
 end (* Loop *)
