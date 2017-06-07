@@ -2,7 +2,10 @@ type 'a t = 'a list * 'a list
 
 val empty    : 'a t
 val is_empty : 'a t -> bool
+
 val at_last  : 'a t -> bool
+val at_first : 'a t -> bool
+val at_end   : 'a t -> bool
 
 val singleton : 'a   -> 'a t
 val select    : 'a t -> 'a option

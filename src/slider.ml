@@ -8,8 +8,15 @@ let empty = ([],[])
 let is_empty = function
   | ([],[]) -> true
   | _       -> false
+
+let at_end  = function
+  | (_, []) -> true
+  | _       -> false
 let at_last = function
   | (_, [x]) -> true
+  | _        -> false
+let at_first = function
+  | ([], _) -> true
   | _       -> false
 
 let singleton x = ([], [x])
