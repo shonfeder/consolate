@@ -52,6 +52,8 @@ struct
       | Remove
       | Next
       | Prev
+      | FwdLine
+      | BwdLine
       (* TODO *)
       (* | Menu *)
 
@@ -66,16 +68,34 @@ struct
       let open BatOption.Infix in
       Slider.select model >>= remove_if_at_beginning
 
-    let option_msg_of_arrow = function
+    let option_fwd model =
+      match Slider.select model with
+      | None      -> None
+      | Some line ->
+        if LE.Model.at_end line
+        then Some FwdLine
+        else None
+
+    let option_bwd model =
+      match Slider.select model with
+      | None      -> None
+      | Some line ->
+        if LE.Model.at_start line
+        then Some BwdLine
+        else None
+
+    let option_msg_of_arrow model = function
       | `Up    -> Some Prev
       | `Down  -> Some Next
+      | `Left  -> option_bwd model
+      | `Right -> option_fwd model
       | _      -> None
 
     let option_msg_of_key model = function
       | `Escape     -> Some Quit
       | `Enter      -> Some Add
       | `Backspace  -> option_remove_of_model model
-      | `Arrow dir  -> option_msg_of_arrow dir
+      | `Arrow dir  -> option_msg_of_arrow model dir
       | _           -> None
 
     let of_state (event, model) =
@@ -93,11 +113,20 @@ struct
 
     let init = Slider.singleton empty_line
 
+    let append_to_selected_line line model =
+      Slider.select_map (fun selected -> LE.Model.append selected line) model
+
     let prev : Model.t -> Model.t = Slider.bwd
     let next : Model.t -> Model.t = Slider.fwd_till_last
 
-    let append_to_selected_line line model =
-      Slider.select_map (fun selected -> LE.Model.append selected line) model
+    let fwd_line model =
+      model
+      |> Slider.fwd
+      |> Slider.select_map LE.Model.to_start
+    let bwd_line model =
+      model
+      |> Slider.bwd
+      |> Slider.select_map LE.Model.to_end
 
     let add model =
       let (front, back) =
@@ -128,10 +157,12 @@ struct
       let open Message in
       function
       | Quit    -> Error None
-      | Add    -> Ok (add model)
-      | Remove -> Ok (remove model)
-      | Next   -> Ok (next model)
-      | Prev   -> Ok (prev model)
+      | Add     -> Ok (add model)
+      | Remove  -> Ok (remove model)
+      | Next    -> Ok (next model)
+      | Prev    -> Ok (prev model)
+      | FwdLine -> Ok (fwd_line model)
+      | BwdLine -> Ok (bwd_line model)
 
     let of_state : state -> return =
       fun (event, model) ->
