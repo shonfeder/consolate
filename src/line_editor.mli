@@ -5,6 +5,12 @@ sig
     val empty : t
     val is_empty : t -> bool
 
+    val at_start : t -> bool
+    val at_end   : t -> bool
+
+    val to_start : t -> t
+    val to_end   : t -> t
+
     val of_string : string -> t
     val to_string : t -> string
 

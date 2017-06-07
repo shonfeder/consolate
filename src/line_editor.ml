@@ -8,6 +8,12 @@ sig
     val empty : t
     val is_empty : t -> bool
 
+    val at_start : t -> bool
+    val at_end   : t -> bool
+
+    val to_start : t -> t
+    val to_end   : t -> t
+
     val of_string : string -> t
     val to_string : t -> string
 
@@ -63,6 +69,12 @@ struct
     | []  -> true
     | [c] -> Uchar.of_char ' ' = c
     | _   -> false
+
+  let at_start = Slider.at_first
+  let at_end   = Slider.at_last
+
+  let to_start = Slider.fbwd
+  let to_end  model = model |> Slider.ffwd |> Slider.bwd
 
   let front = Slider.front
   let back  = Slider.back
