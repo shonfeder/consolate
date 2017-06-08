@@ -2,6 +2,17 @@
 
 This is meant to be viewed in an environment that fully supports org-mode.
 
+* Module Terminal Widget Library
+** TODO Text editor
+*** TODO Integrate Menu
+** TODO Menu
+*** TODO Use unicode box drawing for display
+    https://en.wikipedia.org/wiki/Box-drawing_character
+*** TODO Parse string into menu
+*** TODO Expand to menu system
+**** DONE Right/Left switch between menus
+     CLOSED: [2017-06-08 Thu 17:26]
+**** TODO Easy addition of sub-menus
 * JSON Config terminal editor
 ** Design
 *** UI
@@ -38,9 +49,12 @@ This is meant to be viewed in an environment that fully supports org-mode.
 **** DONE Presentation of select/edit
      CLOSED: [2017-04-15 Sat 09:22]
 *** TODO Configurable keys
-*** TODO Refactor to remove double-entry functions
-**** TODO Refactor ~Model.value~
-**** TODO Refactor the update functions
+*** DONE Refactor to remove double-entry functions
+    CLOSED: [2017-06-08 Thu 15:32]
+**** DONE Refactor ~Model.value~
+     CLOSED: [2017-06-08 Thu 15:32]
+**** DONE Refactor the update functions
+     CLOSED: [2017-06-08 Thu 15:32]
 *** TODO Style view
 **** DONE Initial styling for prototyping
      CLOSED: [2017-04-16 Sun 08:39]
