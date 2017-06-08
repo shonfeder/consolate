@@ -3,12 +3,14 @@ open Notty_unix
 
 type event = [ Unescape.event | `Resize of (int * int) | `End ]
 
+module type Model =
+sig
+  type t
+end
+
 module type Program =
 sig
-  module Model : sig
-    type t
-  end
-
+  module Model : Model
   module Update : sig
     type state  = event * Model.t
     type return = (Model.t, Model.t option) result
@@ -24,6 +26,21 @@ sig
     val of_model : Model.t -> Notty.image
   end
 end (* Program *)
+
+(** Make base versions of the standard program modules *)
+module Make =
+struct
+
+  module Update =
+  struct
+    module Types (Model:Model) =
+    struct
+      type state  = event * Model.t
+      type return = (Model.t, Model.t option) result
+    end
+  end (* Update *)
+
+end (* Make *)
 
 module Loop (Prog:Program) =
 struct
