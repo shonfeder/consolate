@@ -74,7 +74,11 @@ struct
           |> Slider.to_list
           |> List.iter write_line_to_file
         ; close_out oc )
+  end (* Model *)
 
+  module Return =
+  struct
+    type t = Model.t option
   end
 
   module Composing =
@@ -147,8 +151,7 @@ struct
 
   module Update =
   struct
-    type state  = Consolate_term.event * Model.t
-    type return = (Model.t, Model.t option) result
+    include Consolate_term.Make.Update.Types (Model) (Return)
 
     let empty_line = LE.Update.init
 

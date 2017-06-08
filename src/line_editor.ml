@@ -117,6 +117,10 @@ struct
 
 end (* Model *)
 
+module Return =
+struct
+  type t = Model.t
+end
 module Message =
 struct
   type t =

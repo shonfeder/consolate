@@ -8,12 +8,19 @@ sig
   type t
 end
 
+module type Return =
+sig
+  type t
+end
+
 module type Program =
 sig
   module Model : Model
+  module Return : Return
+
   module Update : sig
     type state  = event * Model.t
-    type return = (Model.t, Model.t option) result
+    type return = (Model.t, Return.t option) result
     (** [Ok] means the input loop continues.
         [Error] means the input should terminate, and the
         optional value returned*)
@@ -33,10 +40,10 @@ struct
 
   module Update =
   struct
-    module Types (Model:Model) =
+    module Types (Model:Model) (Return:Return) =
     struct
       type state  = event * Model.t
-      type return = (Model.t, Model.t option) result
+      type return = (Model.t, Return.t option) result
     end
   end (* Update *)
 

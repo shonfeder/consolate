@@ -28,12 +28,12 @@ struct
 
   module Component = Composing.Component
   module Model   = Model
+  module Return  = Return
   module View    = View
 
   module Update =
   struct
-    type state  = Update.state
-    type return = Update.return
+    include Consolate_term.Make.Update.Types (Model) (Return)
 
     let init = Update.init
 
@@ -44,7 +44,7 @@ struct
         let selected' =
           match Component.Update.of_state (event, selected) with
             | Ok selected'           -> selected'
-            | Error (Some selected') -> selected'
+            | Error (Some selected') -> selected (* XXX selected' *)
             | Error None             -> selected
         in
         Ok (Composing.replace selected' model)
