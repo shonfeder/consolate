@@ -3,9 +3,10 @@
 This is meant to be viewed in an environment that fully supports org-mode.
 
 * Module Terminal Widget Library
-** TODO Text editor
-*** TODO Integrate Menu
-** TODO Menu
+** Text editor
+*** TODO Integrate Menu.
+*** TODO Add integrated loading from/saving to file.
+** Menu
 *** TODO Use unicode box drawing for display
     https://en.wikipedia.org/wiki/Box-drawing_character
 *** TODO Parse string into menu
@@ -13,6 +14,8 @@ This is meant to be viewed in an environment that fully supports org-mode.
 **** DONE Right/Left switch between menus
      CLOSED: [2017-06-08 Thu 17:26]
 **** TODO Easy addition of sub-menus
+** Composition
+*** TODO System for passing control over to sub-components.
 * JSON Config terminal editor
 ** Design
 *** UI
@@ -72,3 +75,4 @@ This is meant to be viewed in an environment that fully supports org-mode.
      CLOSED: [2017-05-05 Fri 00:43]
 **** TODO Implement complete minimal control scheme.
 *** TODO Create extensible framework to specialize config schema
+*** TODO Transfer to Consolate_term based implementation
