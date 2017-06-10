@@ -1,7 +1,7 @@
 open Notty
 open Json_t
 
-module M = Model
+module M = Json_config_model
 
 let (%) = Batteries.(%) (* compose *)
 let id x = x
@@ -86,4 +86,4 @@ and of_config fieldsets =
   in
   fieldsets |> Slider.to_list |> stack value_of_fieldset
 
-let of_model : Model.t -> Notty.image = of_value Model.Displayed
+let of_model : M.t -> Notty.image = of_value M.Displayed

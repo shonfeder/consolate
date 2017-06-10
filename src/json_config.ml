@@ -1,9 +1,9 @@
 open Notty
 open Notty_unix
 
-module M = Model
-module V = View
-module U = Update
+module M = Json_config_model
+module V = Json_config_view
+module U = Json_config_update
 
 let json = Json_io.Load.file "test/data/example.json"
 let init = (None, M.of_json json)

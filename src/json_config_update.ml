@@ -1,4 +1,6 @@
+module Model = Json_config_model
 open Model
+
 type msg =
   | Next
   | Prev
