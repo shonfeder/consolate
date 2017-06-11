@@ -4,7 +4,12 @@ open Notty_unix
 (* TODO Generalize to deal with multiple components *)
 
 (** A Composer is a [Consolate_term.Program] that uses other
-    [Consolate_term.Program]s as components.  *)
+    [Consolate_term.Program]s as components.
+
+    E.g., we can compose a text editor that uses a line editor as a component:
+      module Editor_composer = Text_editor.Prog(Line_editor)
+      module Editor_prog     = Composition.Make(Editor_composer)
+      module Editor = Consolate_term.Loop(Editor_prog) *)
 module type Composer =
 sig
   include Consolate_term.Program
@@ -61,7 +66,3 @@ struct
 
 end (* Make *)
 
-(** E.g., we can compose a text editor that uses a line editor as a component:
-    module Editor_composer = Editor(Line_editor)
-    module Editor_prog     = Make(Editor_composer)
-    module Editor = Consolate_term.Loop(Editor_prog) *)
