@@ -2,7 +2,7 @@
 
 This is meant to be viewed in an environment that fully supports org-mode.
 
-* Module Terminal Widget Library
+* Module Terminal Widgets
 ** Text editor
 *** TODO Integrate Menu.
 *** TODO Add integrated loading from/saving to file.
@@ -16,63 +16,80 @@ This is meant to be viewed in an environment that fully supports org-mode.
 **** TODO Easy addition of sub-menus
 ** Composition
 *** TODO System for passing control over to sub-components.
-* JSON Config terminal editor
-** Design
-*** UI
-**** Modal editing
-***** Basic
-      - [X] Select a label by pressing ~j/k~ (up/down:fwd/rwd).
-      - [ ] Begin editing label by pressing ~i~ (insert).
-      - [ ] Edit label contents.
-      - [ ] Return to normal mode with ~Esc~
-      - [ ] Selecting an item off screen should scroll the view port down.
-***** Advanced
-      - [ ] Jump to any field with home-row hints.
-      - [ ] Undo/Redo
-      - [ ] Search
-** Tasks
-*** DONE Create model
-    CLOSED: [2017-04-14 Fri 07:49]
-**** DONE Conversion from ~json~
+** Modal
+   A Composer module that provides a framework for a generalized framework for
+   modal interfaces.
+*** Design
+    It should be parameterized around a component. The component must have two
+    module
+**** Required modules in component
+***** Mode
+****** Normal
+****** Insert
+*** Tasks
+**** TODO Basic implementation
+**** TODO Compose into modal text editor
+
+** JSON Config terminal editor
+*** Design
+**** UI
+***** Modal editing
+****** Basic
+       - [X] Select a label by pressing ~j/k~ (up/down:fwd/rwd).
+       - [ ] Begin editing label by pressing ~i~ (insert).
+       - [ ] Edit label contents.
+       - [ ] Return to normal mode with ~Esc~
+       - [ ] Selecting an item off screen should scroll the view port down.
+****** Advanced
+       - [ ] Jump to any field with home-row hints.
+       - [ ] Undo/Redo
+       - [ ] Search
+*** Tasks
+**** DONE Create model
      CLOSED: [2017-04-14 Fri 07:49]
-**** DONE Selected field
-     CLOSED: [2017-04-14 Fri 07:49]
-***** ... selected
-**** DONE Whether selected field is edited or not
-     CLOSED: [2017-04-14 Fri 07:49]
-***** ... (editing option) selected
-*** DONE Create view
-    CLOSED: [2017-04-15 Sat 09:22]
-**** DONE Presentation of values
+***** DONE Conversion from ~json~
+      CLOSED: [2017-04-14 Fri 07:49]
+***** DONE Selected field
+      CLOSED: [2017-04-14 Fri 07:49]
+****** ... selected
+***** DONE Whether selected field is edited or not
+      CLOSED: [2017-04-14 Fri 07:49]
+****** ... (editing option) selected
+**** DONE Create view
      CLOSED: [2017-04-15 Sat 09:22]
-**** DONE Presentation of fields
-     CLOSED: [2017-04-15 Sat 09:22]
-**** DONE Presentation of fieldset
-     CLOSED: [2017-04-15 Sat 09:22]
-**** DONE Presentation of select/edit
-     CLOSED: [2017-04-15 Sat 09:22]
-*** TODO Configurable keys
-*** DONE Refactor to remove double-entry functions
-    CLOSED: [2017-06-08 Thu 15:32]
-**** DONE Refactor ~Model.value~
+***** DONE Presentation of values
+      CLOSED: [2017-04-15 Sat 09:22]
+***** DONE Presentation of fields
+      CLOSED: [2017-04-15 Sat 09:22]
+***** DONE Presentation of fieldset
+      CLOSED: [2017-04-15 Sat 09:22]
+***** DONE Presentation of select/edit
+      CLOSED: [2017-04-15 Sat 09:22]
+**** TODO Configurable keys
+**** DONE Refactor to remove double-entry functions
      CLOSED: [2017-06-08 Thu 15:32]
-**** DONE Refactor the update functions
-     CLOSED: [2017-06-08 Thu 15:32]
-*** TODO Style view
-**** DONE Initial styling for prototyping
-     CLOSED: [2017-04-16 Sun 08:39]
-     - [X] Styling for each data-type
-     - [X] Rough layout
-     - [X] Differentiate edit/select/display states
-**** DONE Beta styling for use
-     CLOSED: [2017-05-05 Fri 00:42]
-**** TODO Alpha styling for polish
-*** TODO Create update
-    Events that send messages to update the data
-**** DONE Receive messages and models
-     CLOSED: [2017-05-05 Fri 00:43]
-**** DONE Update state in response to button press
-     CLOSED: [2017-05-05 Fri 00:43]
-**** TODO Implement complete minimal control scheme.
-*** TODO Create extensible framework to specialize config schema
-*** TODO Transfer to Consolate_term based implementation
+***** DONE Refactor ~Model.value~
+      CLOSED: [2017-06-08 Thu 15:32]
+***** DONE Refactor the update functions
+      CLOSED: [2017-06-08 Thu 15:32]
+**** TODO Style view
+***** DONE Initial styling for prototyping
+      CLOSED: [2017-04-16 Sun 08:39]
+      - [X] Styling for each data-type
+      - [X] Rough layout
+      - [X] Differentiate edit/select/display states
+***** DONE Beta styling for use
+      CLOSED: [2017-05-05 Fri 00:42]
+***** TODO Alpha styling for polish
+**** TODO Create update
+     Events that send messages to update the data
+***** DONE Receive messages and models
+      CLOSED: [2017-05-05 Fri 00:43]
+***** DONE Update state in response to button press
+      CLOSED: [2017-05-05 Fri 00:43]
+***** TODO Implement complete minimal control scheme.
+**** TODO Create extensible framework to specialize config schema
+**** TODO Transfer to Consolate_term based implementation
+
+* Tasks
+** TODO Achieve %80 test coverage
