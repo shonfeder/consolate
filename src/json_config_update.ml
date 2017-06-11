@@ -1,4 +1,6 @@
-module Model = Json_config_model
+module Return = Json_config_return
+module Model  = Json_config_model
+
 open Model
 
 type msg =
@@ -8,10 +10,13 @@ type msg =
   | Esc
   | Quit
 
-type state = msg option * Model.t
+include Consolate_term.Make.Update.Types (Model) (Return)
+(* type state = msg option * Model.t *)
 exception Unimplemented
 
 type dir = Fwd | Rwd
+
+let test_data = Json_io.Load.file "test/data/example.json"
 
 (* TODO Implement full editing capabilities *)
 let edit_value = function
@@ -33,7 +38,7 @@ let deselect field =
 let select_fieldset (state, fieldset) = (Selected, fieldset)
 let edit_fieldset (state, fieldset) =
   match state with
-  | Displayed -> (Displayed, fieldset) (* What should this do? *)
+  | Displayed -> (Displayed, fieldset)
   | Selected  -> (Editing, (Slider.select_map select fieldset))
   | Editing   -> (Editing, (Slider.select_map edit fieldset))
 let deselect_fieldset (state, fieldset) =
@@ -117,10 +122,37 @@ let esc model = match model with
     else Config Slider.(select_map esc_fieldset slider)
   | _ -> raise Unimplemented
 
-let of_state : state -> Model.t = function
-  | (None, m)      -> m
-  | (Some Next, m) -> next m
-  | (Some Prev, m) -> prev m
-  | (Some Edit, m) -> edit_model m
-  | (Some Esc,  m) -> esc m
-  | (_, m)         -> m
+(* TODO Make reconfigurable bindings *)
+let uchar_code_to_msg code =
+  match Uchar.to_int code with
+  | 113 -> Some Quit
+  | 106 -> Some Next
+  | 107 -> Some Prev
+  | 101 -> Some Edit
+  | _   -> None
+
+let message_of_state (event, model) =
+  match event with
+  | `Key (`Escape, _)     -> (Some Esc, model)
+  | `Key (`Uchar code, _) -> (uchar_code_to_msg code, model)
+  | _ -> (None, model)
+
+let of_message_model (option_msg, model) =
+  match option_msg with
+  | Some Quit -> Error None
+  | Some Esc  -> Ok (esc model)
+  | Some Next -> Ok (next model)
+  | Some Prev -> Ok (prev model)
+  | Some Edit -> Ok (edit_model model)
+  | _         -> Ok (model)
+
+let init = Model.of_json test_data
+
+let load _ = init
+
+let of_state : state -> (Model.t, Model.t option) result =
+  fun state ->
+    state
+    |> message_of_state
+    |> of_message_model
+
