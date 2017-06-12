@@ -90,6 +90,7 @@ This is meant to be viewed in an environment that fully supports org-mode.
 ***** TODO Implement complete minimal control scheme.
 **** TODO Create extensible framework to specialize config schema
 **** TODO Transfer to Consolate_term based implementation
-
 * Tasks
 ** TODO Achieve %80 test coverage
+** TODO Package as Opam package
+** TODO Package as standalone for Ubuntu?
