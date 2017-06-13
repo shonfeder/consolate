@@ -1,23 +1,24 @@
 open Notty
 open Notty_unix
-
+module CT = Consolate_term
 module type Modal =
 sig
-  include Consolate_term.Program
+  include CT.Program
   module Mode :
   sig
     type t
     val normal : t
-    val model_of_state : t -> Update.state -> Update.return
+    val of_model_event_mode
+      : Update.state -> t -> Model.t * t
   end
 end (* Modal *)
 
-module Make (Prog:Modal) : Consolate_term.Program =
+module Make (Prog:Modal) : CT.Program =
 struct
   module Model =
   struct
-    type t = { mode  : Prog.Mode.t
-             ; model : Prog.Model.t }
+    type t = { mode : Prog.Mode.t
+             ; repr : Prog.Model.t }
   end
 
   module Return =
@@ -27,11 +28,16 @@ struct
 
   module Update =
   struct
-    include Consolate_term.Make.Update.Types (Model) (Return)
-    let init = Model.{ mode  = Prog.Mode.normal
-                     ; model = Prog.Update.init}
+    include CT.Make.Update.Types (Model) (Return)
+    let init = Model.{ mode = Prog.Mode.normal
+                     ; repr = Prog.Update.init}
     let load _ = init
-    let of_state state = Ok init
+
+    let of_state (event, model) =
+      let open Model in
+      let {mode; repr} = model in
+        match Prog.Mode.of_model_event_mode (event, repr)  mode with
+        | (repr, mode) -> Ok {mode; repr}
   end
 
   module View =
