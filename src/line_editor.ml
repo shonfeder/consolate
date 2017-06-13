@@ -1,11 +1,13 @@
 open Notty
 open Notty_unix
 
+
 module Aux =
 struct
   let drop_last list =
     BatList.take (List.length list - 1) list
 end (* Aux *)
+
 
 module Model =
 struct
@@ -78,10 +80,13 @@ struct
 
 end (* Model *)
 
+
 module Return =
 struct
   type t = Model.t
 end
+
+
 module Message =
 struct
   type t =
@@ -140,6 +145,7 @@ struct
 
 end (* Update *)
 
+
 module View =
 struct
   let of_uchar attr c = I.uchar attr c 1 1
@@ -156,3 +162,20 @@ struct
     in
     I.(front <|> selected <|> back)
 end (* View *)
+
+
+module Mode =
+struct
+  type t =
+    | Normal
+    | Insert
+
+  let normal = Normal
+
+  let in_normal state = Update.of_state (* XXX *)
+  let in_insert state = Update.of_state
+
+  let of_model_event_mode state = function
+    | Normal -> in_normal state
+    | Insert -> in_insert state
+end
