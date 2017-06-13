@@ -29,7 +29,7 @@ This is meant to be viewed in an environment that fully supports org-mode.
 *** Tasks
 **** TODO Basic implementation
 **** TODO Compose into modal text editor
-
+**** TODO Draw out a plan of the overall architecture
 ** JSON Config terminal editor
 *** Design
 **** UI
@@ -89,7 +89,9 @@ This is meant to be viewed in an environment that fully supports org-mode.
       CLOSED: [2017-05-05 Fri 00:43]
 ***** TODO Implement complete minimal control scheme.
 **** TODO Create extensible framework to specialize config schema
-**** TODO Transfer to Consolate_term based implementation
+**** DONE Transfer to Consolate_term based implementation
+     CLOSED: [2017-06-12 Mon 22:55]
+**** TODO Implement editing via Line_editor
 * Tasks
 ** TODO Achieve %80 test coverage
 ** TODO Package as Opam package
