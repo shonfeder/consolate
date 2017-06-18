@@ -1,6 +1,7 @@
 open Notty
 open Notty_unix
 module CT = Consolate_term
+
 module type Modal =
 sig
   include CT.Program
@@ -8,7 +9,7 @@ sig
   sig
     type t
     val normal : t
-    val of_model_event_mode
+    val of_state_mode
       : Update.state -> t -> Model.t * t
   end
 end (* Modal *)
@@ -36,7 +37,7 @@ struct
     let of_state (event, model) =
       let open Model in
       let {mode; repr} = model in
-        match Prog.Mode.of_model_event_mode (event, repr)  mode with
+        match Prog.Mode.of_state_mode (event, repr) mode with
         | (repr, mode) -> Ok {mode; repr}
   end
 
