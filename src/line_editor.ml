@@ -102,7 +102,7 @@ struct
     | `Left  -> Some Bwd
     | `Right -> Some Fwd
 
-  let option_msg_of_key = function
+  let of_key = function
     | `Escape     -> Some Esc
     | `Enter      -> Some Enter
     | `Uchar code -> Some (Code code)
@@ -111,7 +111,7 @@ struct
     | _           -> None
 
   let of_event = function
-    | `Key (key, _) -> option_msg_of_key key
+    | `Key (key, _) -> of_key key
     | _  -> None
 end (* Message *)
 
@@ -164,18 +164,85 @@ struct
 end (* View *)
 
 
+(* TODO Should provide modal interface... *)
 module Mode =
 struct
+
   type t =
     | Normal
     | Insert
 
+  module Normal =
+  struct
+    (* XXX *)
+    exception Unimplemented
+
+    module Message =
+    struct
+      type t =
+        | Load
+        | Save
+        | Quit
+        | End
+      let of_code code =
+        (* TODO Handle unicode input safely *)
+        try
+          match Uchar.to_char code with
+          | 'l' -> Some Load
+          | 'w' -> Some Save
+          | 'q' -> Some Quit
+          | _   -> None
+        with
+          Invalid_argument _ ->
+          match Uchar.to_int code with
+          | _ -> None
+
+      let of_key = function
+        | `Uchar code -> of_code code
+        | `Escape     -> Some End
+        | _           -> None
+
+      let of_event : Consolate_term.event -> t option = function
+        | `Key (key, _) -> of_key key
+        | _ -> None
+    end (* Message *)
+
+    module Update =
+    struct
+      module Msg = Message
+
+      let of_msg model : Message.t -> Model.t * t = function
+        (* | Msg.Quit -> None *)
+        | Msg.End  -> (model, Insert)
+        | Msg.Save -> raise Unimplemented
+        | Msg.Load -> raise Unimplemented
+        | _ -> (model, Normal)
+        (* | _ -> TODO Deal with quiting...  *)
+
+      let of_state : Update.state -> (Model.t * t) =
+        fun (event, model) ->
+          match Msg.of_event event with
+          | Some msg -> of_msg model msg
+          | None     -> (model, Normal)
+    end
+  end (* Normal *)
+
+  module Insert =
+  struct
+    module Update =
+    struct
+      let of_state ((event, model) as state) =
+        match Update.of_state state with
+        | Error None          -> (model, Normal) (* XXX *)
+        | Error (Some model') -> (model', Normal)
+        | Ok model'           -> (model', Insert)
+
+    end
+  end (* Insert *)
+
   let normal = Normal
 
-  let in_normal state = Update.of_state (* XXX *)
-  let in_insert state = Update.of_state
-
-  let of_model_event_mode state = function
-    | Normal -> in_normal state
-    | Insert -> in_insert state
+  let of_state_mode state = function
+    | Normal -> Normal.Update.of_state state
+    | Insert -> Insert.Update.of_state state
 end
