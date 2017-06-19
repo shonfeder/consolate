@@ -14,6 +14,16 @@ This is meant to be viewed in an environment that fully supports org-mode.
 **** DONE Right/Left switch between menus
      CLOSED: [2017-06-08 Thu 17:26]
 **** TODO Easy addition of sub-menus
+** Spacemacs-like leader key menu system
+*** TODO Implement using Goguen's principles of algebraic semiotic design
+*** TODO Write up results of study
+** File browser
+   A special case of Menu.
+   Requires the sub-menus.
+*** TODO Implement sub-menus
+*** TODO Return file name after browsing
+*** TODO Change base directory
+*** TODO Create directory
 ** Composition
 *** TODO System for passing control over to sub-components.
 ** Modal
