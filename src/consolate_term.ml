@@ -41,8 +41,11 @@ struct
   module Update =
   struct
     module Types (Model:Model) (Return:Return) =
+    (* TODO Rename module to "Basis" *)
     struct
       type state  = event * Model.t
+      (* TODO Change form result type to custom return type *)
+      (* type ('a, 'b) return = Halt | Cont of 'a | Return of 'b *)
       type return = (Model.t, Return.t option) result
       let halt : return = Error None
       let return : Return.t -> return =
