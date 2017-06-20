@@ -145,10 +145,16 @@ struct
         in
         update |? cont model
 
+    let of_esc : Model.t -> return =
+      fun model ->
+        if Slider.at_first model
+        then halt
+        else cont (Slider.bwd model)
+
     let of_msg : Model.t -> Message.t -> return =
       fun model -> function
         | Message.Select c -> of_selection c model
-        | Message.Esc      -> halt
+        | Message.Esc      -> of_esc model
         (* | _ -> Ok model *)
 
     let of_state : state -> return = fun (event, model) ->
@@ -161,7 +167,7 @@ struct
   struct
     open Model
 
-    let opt_sep  = I.(string A.(fg green) " = ")
+    let opt_sep  = I.(string A.(fg blue) " › ")
     let opts_sep = I.(string A.(fg red) " » ")
     let of_name n     = I.(string A.empty n)
     let of_title t    = I.(string A.(fg magenta) t)
