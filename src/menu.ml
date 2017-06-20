@@ -198,7 +198,7 @@ struct
 
   module Update =
   struct
-    include CT.Make.Update.Types (Model) (Return)
+    include CT.Make.Update.Basis (Model) (Return)
     module Msg = Message
 
     let init = Model.of_menus Menu.menus

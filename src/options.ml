@@ -125,7 +125,7 @@ struct
 
   module Update =
   struct
-    include CT.Make.Update.Types (Model) (Return)
+    include CT.Make.Update.Basis (Model) (Return)
     let init = Model.of_menu Menu.menu
     let load : string -> Model.t   = fun _ -> init
 
@@ -135,18 +135,18 @@ struct
         let update =
           Slider.select model >>=
           find selector       >>= function
-          | Opt opt   -> Some (return opt.thing)
+          | Opt opt   -> Some (Flow.return opt.thing)
           | Opts opts -> Some (Slider.fwd model
                                |> Slider.insert opts.opts
-                               |> cont)
+                               |> Flow.cont)
         in
-        update |? cont model
+        update |? Flow.cont model
 
     let of_esc : Model.t -> return =
       fun model ->
         if Slider.at_first model
-        then halt
-        else cont (Slider.bwd model)
+        then Flow.halt
+        else Flow.cont (Slider.bwd model)
 
     let of_msg : Model.t -> Message.t -> return =
       fun model -> function
@@ -156,7 +156,7 @@ struct
 
     let of_state : state -> return = fun (event, model) ->
       match Message.of_event event with
-      | None     -> cont model
+      | None     -> Flow.cont model
       | Some msg -> of_msg model msg
   end
 

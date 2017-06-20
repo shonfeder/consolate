@@ -151,7 +151,7 @@ struct
 
   module Update =
   struct
-    include Consolate_term.Make.Update.Types (Model) (Return)
+    include Consolate_term.Make.Update.Basis (Model) (Return)
 
     let empty_line = LE.Update.init
 

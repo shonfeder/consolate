@@ -29,7 +29,7 @@ struct
 
   module Update =
   struct
-    include CT.Make.Update.Types (Model) (Return)
+    include CT.Make.Update.Basis (Model) (Return)
     let init = Model.{ mode = Prog.Mode.normal
                      ; repr = Prog.Update.init}
     let load _ = init

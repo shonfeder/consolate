@@ -10,7 +10,7 @@ type msg =
   | Esc
   | Quit
 
-include Consolate_term.Make.Update.Types (Model) (Return)
+include Consolate_term.Make.Update.Basis (Model) (Return)
 (* type state = msg option * Model.t *)
 exception Unimplemented
 

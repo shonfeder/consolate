@@ -38,22 +38,38 @@ end (* Program *)
 module Make =
 struct
 
-  module Update =
-  struct
-    module Types (Model:Model) (Return:Return) =
-    (* TODO Rename module to "Basis" *)
-    struct
+  module Update = struct
+
+    (** Basic types and functions *)
+    module Basis (Model:Model) (Return:Return) = struct
       type state  = event * Model.t
       (* TODO Change form result type to custom return type *)
       (* type ('a, 'b) return = Halt | Cont of 'a | Return of 'b *)
       type return = (Model.t, Return.t option) result
-      let halt : return = Error None
-      let return : Return.t -> return =
-        fun x -> Error (Some x)
-      let cont : Model.t -> return =
-        fun x -> Ok x
-    end
+
+      (** Program control flow *)
+      module Flow = struct
+        let halt : return = Error None
+        let return : Return.t -> return =
+          fun x -> Error (Some x)
+        let cont : Model.t -> return =
+          fun x -> Ok x
+      end (* Prog *)
+
+    end (* Basis *)
+
   end (* Update *)
+
+  module Message =
+  struct
+
+    module Functions (M:sig type t end) =
+    struct
+      let of_keys : (Notty.Unescape.key * M.t) list
+        -> (Notty.Unescape.key -> M.t option)
+        = fun assoc -> fun key -> BatList.Exceptionless.assoc key assoc
+    end;;
+  end (* Message *)
 
 end (* Make *)
 
