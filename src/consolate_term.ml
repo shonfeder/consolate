@@ -44,6 +44,11 @@ struct
     struct
       type state  = event * Model.t
       type return = (Model.t, Return.t option) result
+      let halt : return = Error None
+      let return : Return.t -> return =
+        fun x -> Error (Some x)
+      let cont : Model.t -> return =
+        fun x -> Ok x
     end
   end (* Update *)
 
