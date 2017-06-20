@@ -11,91 +11,88 @@ module type Opts =
 sig
 
   (* Lvl 5 *)
-  type thing
   type name        = string
   type description = string option
   type selector    = char
 
   (* Lvl 4 *)
-  type opt =
+  type 'a opt =
     { name        : name
-    ; thing       : thing
+    ; thing       : 'a
     ; description : description }
 
   (* Lvl 3 *)
-  type opts =
+  type 'a opts =
     { title : name
-    ; opts  : choice}
-  and item =
-    | Opt  of opt
-    | Opts of opts
+    ; opts  : 'a choice}
+  and 'a item =
+    | Opt  of 'a opt
+    | Opts of 'a opts
 
   (* Lvl 2 *)
-  and choice = item CharMap.t
+  and 'a choice = 'a item CharMap.t
 
   (* Lvl 1 *)
-  type t = choice Slider.t
+  type 'a t = 'a choice Slider.t
 
-  val of_assoc : (selector * item) list -> choice
+  val of_assoc : (selector * 'a item) list -> 'a choice
 
-  val opt  : ?description:string -> name -> thing -> item
-  val opts : name -> choice -> item
+  val opt  : ?description:string -> name -> 'a -> 'a item
+  val opts : name -> 'a choice -> 'a item
 end
 
 
-module Opts (Thing:sig type t end) : Opts with type thing = Thing.t =
+module Opts =
 struct
 
   (* Lvl 5 *)
-  type thing = Thing.t
   type name        = string
   type description = string option
   type selector    = char
 
   (* Lvl 4 *)
-  type opt =
+  type 'a opt =
     { name        : name
-    ; thing       : thing
+    ; thing       : 'a
     ; description : description }
 
   (* Lvl 3 *)
-  and opts =
+  and 'a opts =
     { title : name
-    ; opts  : choice}
-  and item =
-    | Opt  of opt
-    | Opts of opts
+    ; opts  : 'a choice}
+  and 'a item =
+    | Opt  of 'a opt
+    | Opts of 'a opts
   (* Lvl 2 *)
-  and choice = item CharMap.t
+  and 'a choice = 'a item CharMap.t
 
   (* Lvl 1 *)
-  type t = choice Slider.t
+  type 'a t = 'a choice Slider.t
 
-  let of_assoc : (selector * item) list -> choice = fun assoc ->
+  let of_assoc : (selector * 'a item) list -> 'a choice = fun assoc ->
     let add_item (selector, item) choice =
       CharMap.add selector item choice
     in
     List.fold_right add_item assoc CharMap.empty
 
-  let opt ?description name thing : item =
+  let opt ?description name thing : 'a item =
     Opt {name; thing; description}
-  let opts title opts : item =
+  let opts title opts : 'a item =
     Opts {title; opts}
 end
 
 module type Menu_spec =
 sig
-  module Opts : Opts
-  type t = Opts.thing
-  val menu : Opts.choice
+  type t
+  val menu : t Opts.choice
 end
 
-module Make (Menu:Menu_spec) : CT.Program =
+module Make (Menu:Menu_spec) : CT.Program with type Return.t = Menu.t =
 struct
   module Model =
   struct
-    include Menu.Opts
-    let of_menu : choice -> t = Slider.singleton
+    type t = Menu.t Opts.t
+    let of_menu : 'a Opts.choice -> t = Slider.singleton
   end
 
   module Return =
@@ -109,7 +106,7 @@ struct
     module T =
     struct
       type t =
-        | Select of Model.selector
+        | Select of Opts.selector
         | Esc
     end
     include T
@@ -132,9 +129,9 @@ struct
     let init = Model.of_menu Menu.menu
     let load : string -> Model.t   = fun _ -> init
 
-    let of_selection : Model.selector -> Model.t -> return =
+    let of_selection : Opts.selector -> Model.t -> return =
       fun selector model ->
-        let open Model in
+        let open Opts in
         let update =
           Slider.select model >>=
           find selector       >>= function
@@ -165,7 +162,7 @@ struct
 
   module View =
   struct
-    open Model
+    open Opts
 
     let opt_sep  = I.(string A.(fg blue) " › ")
     let opts_sep = I.(string A.(fg red) " » ")
@@ -181,7 +178,7 @@ struct
       | Opt opt   -> of_opt s opt
       | Opts opts -> of_opts s opts
 
-    let of_choice : Model.choice -> Notty.image = fun choice ->
+    let of_choice : Menu.t Opts.choice -> Notty.image = fun choice ->
       (* TODO Stack to height of x then fill out horizontally *)
       let stack selector item stacking =
         I.(stacking <-> of_item selector item)
@@ -195,10 +192,9 @@ struct
   end
 end (* Make *)
 
-module Test : Menu_spec =
+module Test : Menu_spec with type t = int =
 struct
-  module Opts = Opts (struct type t = int end)
-  type t = Opts.thing
+  type t = int
   open Opts
   let menu = of_assoc
       [ 'a', opt "option a" 1
