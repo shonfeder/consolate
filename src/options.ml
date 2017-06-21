@@ -178,17 +178,31 @@ struct
       | Opt opt   -> of_opt s opt
       | Opts opts -> of_opts s opts
 
-    let of_choice : Menu.t Opts.choice -> Notty.image = fun choice ->
-      (* TODO Stack to height of x then fill out horizontally *)
-      let stack selector item stacking =
-        I.(stacking <-> of_item selector item)
-      in
-      CharMap.fold stack choice I.empty
+    let of_choice
+      : ?rows:int -> Menu.t Opts.choice -> Notty.image
+      = fun ?(rows=10) choice ->
+
+        let add_column : Notty.image * Notty.image -> Notty.image
+          = fun (column, columns) -> I.(columns <|> pad ~r:2 column)
+        in
+
+        let arrange : char -> Menu.t Opts.item
+          -> Notty.image * Notty.image
+          -> Notty.image * Notty.image
+          = fun selector item (column, columns) ->
+            let item_img = of_item selector item in
+            if I.height column < rows
+            then I.(column <-> item_img), columns
+            else item_img, add_column (column, columns)
+        in
+        (I.empty, I.empty)
+        |> CharMap.fold arrange choice
+        |> add_column
 
     let of_model : Model.t -> Notty.image = fun model ->
       match Slider.select model with
       | None        -> I.empty
-      | Some choice -> of_choice choice
+      | Some choice -> of_choice ~rows:1 choice
   end
 end (* Make *)
 
