@@ -102,8 +102,6 @@ sig
   val menu : t Opts.t
 end
 
-(* TODO Add titles *)
-(* TODO Track bread crumbs of patch through menu tree *)
 (* TODO For menues longer than the screen (pages),
    make '<' and '>' to go next page *)
 
@@ -189,6 +187,7 @@ struct
     let rec hconcat
       : ?sep:Notty.image   -> Notty.image list -> Notty.image
       = fun ?(sep=I.empty) -> function | []    -> I.empty
+                                       | [i]   -> i
                                        | i::is -> I.(i <|> sep <|> hconcat ~sep is)
 
 
@@ -227,19 +226,19 @@ struct
         |> CharMap.fold arrange opts.opts
         |> add_column
 
+    let bread_crumbs_of_model : Model.t -> Notty.image
+      = fun model ->
+        model
+        |> Slider.fwd
+        |> Slider.front
+        |> List.map Opts.opts_title
+        |> List.map of_title
+        |> hconcat ~sep:opts_sep
+
     let of_model
       : Model.t -> Notty.image
       = fun model ->
-        (* TODO Refactor out the bread crumbs *)
-        (* TODO Pick up bread crumbs when back backtracking
-           using Slider.front etc... *)
-        let bread_crumbs =
-          model
-          |> Slider.to_list
-          |> List.map Opts.opts_title
-          |> List.map of_title
-          |> hconcat ~sep:opts_sep
-        in
+        let bread_crumbs = bread_crumbs_of_model model in
       match Slider.select model with
       | None      -> I.empty
       | Some opts -> I.(of_opts ~rows:2 opts
@@ -258,7 +257,11 @@ struct
       ; 'c', of_opts "more opts"
           [ 'x', opt "option x" 3
           ; 'y', opt "option y" 4
-          ; 'z', opt "option z" 5
+          ; 'z', of_opts "even more opts!"
+              [ 'd', opt "option d" 5
+              ; 'e', opt "option e" 6
+              ; 'f', opt "option f" 7
+              ; 'g', opt "option g" 8]
           ]
       ]
 end
