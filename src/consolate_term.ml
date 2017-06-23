@@ -34,6 +34,26 @@ sig
   end
 end (* Program *)
 
+(** Program control flow *)
+module Flow = struct
+  type ('a, 'b) t = ('a, 'b option) result
+  let halt : ('a, 'b) t
+    = Error None
+  let return : 'b -> ('a, 'b) t
+    = fun x -> Error (Some x)
+  let cont : 'a -> ('a, 'b) t
+    = fun x -> Ok x
+
+  module Infix = struct
+    let (>>=) : ('a, 'b) t -> ('a -> ('c, 'b) t) -> ('c, 'b) t
+      = fun m f -> match m with
+        | Ok a    -> f a
+        | Error b -> Error b
+  end
+  include Infix
+
+end (* Prog *)
+
 (** Make base versions of the standard program modules *)
 module Make =
 struct
@@ -47,15 +67,7 @@ struct
       (* type ('a, 'b) return = Halt | Cont of 'a | Return of 'b *)
       type return = (Model.t, Return.t option) result
 
-      (** Program control flow *)
-      module Flow = struct
-        let halt : return = Error None
-        let return : Return.t -> return =
-          fun x -> Error (Some x)
-        let cont : Model.t -> return =
-          fun x -> Ok x
-      end (* Prog *)
-
+      module Flow = Flow
     end (* Basis *)
 
   end (* Update *)
