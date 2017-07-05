@@ -3,37 +3,6 @@ open Notty_unix
 
 type event = [ Unescape.event | `Resize of (int * int) | `End ]
 
-module type Model =
-sig
-  type t
-end
-
-module type Return =
-sig
-  type t
-end
-
-module type Program =
-sig
-  module Model : Model
-  module Return : Return
-
-  module Update : sig
-    type state  = event * Model.t
-    type return = (Model.t, Return.t option) result
-    (** [Ok] means the input loop continues.
-        [Error] means the input should terminate, and the
-        optional value returned*)
-    val init : Model.t
-    val load : string -> Model.t
-    val of_state : state -> return
-  end
-
-  module View : sig
-    val of_model : Model.t -> Notty.image
-  end
-end (* Program *)
-
 (** Program control flow *)
 module Flow = struct
   type ('a, 'b) t = ('a, 'b option) result
@@ -52,7 +21,46 @@ module Flow = struct
   end
   include Infix
 
-end (* Prog *)
+end (* Flow *)
+
+module type Model =
+sig
+  type t
+end
+
+module type Return =
+sig
+  type t
+end
+
+module type Frame = sig
+  module Model  : Model
+  module Return : Return
+end
+
+module type Program =
+sig
+
+  module Model : Model
+  module Return : Return
+
+  module Update : sig
+    type state  = event * Model.t
+    type return = (Model.t, Return.t) Flow.t
+    (** [Ok] means the input loop continues.
+        [Error] means the input should terminate, and the
+        optional value returned*)
+    val init : Model.t
+    val load : string -> Model.t
+    val of_state : state -> return
+  end
+
+  module View : sig
+    val of_model : Model.t -> Notty.image
+  end
+
+end (* Program *)
+
 
 (** Make base versions of the standard program modules *)
 module Make =
@@ -65,7 +73,7 @@ struct
       type state  = event * Model.t
       (* TODO Change form result type to custom return type *)
       (* type ('a, 'b) return = Halt | Cont of 'a | Return of 'b *)
-      type return = (Model.t, Return.t option) result
+      type return = (Model.t, Return.t) Flow.t
 
       module Flow = Flow
     end (* Basis *)
