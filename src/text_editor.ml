@@ -99,8 +99,7 @@ struct
       | Prev
       | FwdLine
       | BwdLine
-      (* TODO *)
-      (* | Menu *)
+      | Menu
 
     (* TODO Append remaining line to previous when cursor at beginning *)
     let option_remove_of_model model =
@@ -143,9 +142,16 @@ struct
       | `Arrow dir  -> option_msg_of_arrow model dir
       | _           -> None
 
+    let option_msg_of_ctl_key model = function
+      | `Uchar c ->
+        (match Uchar.to_int c with
+         | 109 -> Some Menu
+         | _   -> None)
+      | _ -> None
+
     let of_state (event, model) =
       match event with
-      | `Key (key, _) -> option_msg_of_key model key
+      | `Key (key, _)    -> option_msg_of_key model key
       | _  -> None
   end (* Message *)
 
@@ -207,6 +213,7 @@ struct
       | Prev    -> Ok (prev model)
       | FwdLine -> Ok (fwd_line model)
       | BwdLine -> Ok (bwd_line model)
+      | Menu    -> Error None
 
     let of_state : state -> return =
       fun (event, model) ->
