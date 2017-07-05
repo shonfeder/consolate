@@ -18,9 +18,7 @@ This is meant to be viewed in an environment that fully supports org-mode.
 *** TODO Implement using Goguen's principles of algebraic semiotic design
 *** TODO Write up results of study
 ** File browser
-   A special case of Menu.
-   Requires the sub-menus.
-*** TODO Implement sub-menus
+   A tree of Menus.
 *** TODO Return file name after browsing
 *** TODO Change base directory
 *** TODO Create directory
@@ -102,7 +100,17 @@ This is meant to be viewed in an environment that fully supports org-mode.
 **** DONE Transfer to Consolate_term based implementation
      CLOSED: [2017-06-12 Mon 22:55]
 **** TODO Implement editing via Line_editor
+* Design features
+** TODO A modality module
+   Compose programs specifying a mode of operation into a modal program
+   (all programs involved satisfying the Consolate_term.Program interface)
+*** TODO 
 * Tasks
-** TODO Achieve %80 test coverage
+** Change core metaphor ?
+   - Model  -> Structure (Struct)
+   - Update -> Transformation (Trans)
+   - View   -> Representation (Rep)
+* Goals
 ** TODO Package as Opam package
 ** TODO Package as standalone for Ubuntu?
+** TODO Achieve %80 test coverage
