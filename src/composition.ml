@@ -42,7 +42,7 @@ struct
 
     let init = Update.init
 
-    let muxed_result_of_event (event, model) =
+    let compose_result_of_state (event, model) =
       match Composing.selected model with
       | None          -> Ok model
       | Some selected ->
@@ -58,11 +58,10 @@ struct
       fun state ->
         match Message.of_state state with
         | Some msg -> Composer.Update.of_state state
-        | None     -> muxed_result_of_event state
+        | None     -> compose_result_of_state state
 
     let load : string -> Model.t = Composer.Update.load
 
   end (* Update *)
 
 end (* Make *)
-
