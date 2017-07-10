@@ -62,6 +62,7 @@ module Make = struct
       module Model  = Program.Model
       module Return = struct type t = Program.Modes.t end
       module View = Program.View
+
       (** To realize a program mode, the Update_basis must be extended
           with a function [of_state : state -> return] — this is where
           magic happens.
@@ -83,7 +84,7 @@ module Make = struct
       the [Modal] functor creates a new program in which updating and viewing
       the modal program's model is delegated to the appropriate mode module.
 
-      Normal mode should default to the core of the Modal Program? *)
+      XXX: Normal mode should default to the core of the Modal Program? *)
   module Modal (Program:Modal) : CT.Program = struct
     module Model  = struct
       type t = { mode  : Program.Modes.t
@@ -108,7 +109,7 @@ module Make = struct
           match Mode.Update.of_state (event, model) with
           | Ok    model       -> CT.Flow.cont {mode; model}
           | Error (Some mode) ->
-            if mode = Program.Modes.quit
+            if (mode = Program.Modes.quit)
             then CT.Flow.halt
             else CT.Flow.cont {mode; model}
           | Error None        -> CT.Flow.cont {mode; model}

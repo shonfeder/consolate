@@ -1,0 +1,11 @@
+opam-version: "1.2"
+version: "1.0"
+maintainer: "shon.feder@gmail.com"
+authors: ["Shon Feder"]
+homepage: "https://github.com/shonfeder/consolate"
+bug-reports: ""
+dev-repo: ""
+license: "Apache-2.0"
+build: [
+  ["jbuilder" "build" "--only" "consolate" "--root" "." "-j" jobs "@install"]
+]

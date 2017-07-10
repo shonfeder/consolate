@@ -1,0 +1,14 @@
+(jbuild_version 1)
+
+(library
+ ((name consolate)
+  (public_name consolate)
+  (libraries (atdgen
+              batteries
+              ppx_deriving
+              ppx_deriving.std
+              extlib
+              fileutils
+              notty
+              notty.unix
+              yojson))))

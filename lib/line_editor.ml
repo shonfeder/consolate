@@ -165,12 +165,13 @@ end (* View *)
 
 
 (* TODO Should provide modal interface... *)
-module Mode =
+module Modes =
 struct
 
   type t =
     | Normal
     | Insert
+    | Quit
 
   module Normal =
   struct
@@ -236,13 +237,14 @@ struct
         | Error None          -> (model, Normal) (* XXX *)
         | Error (Some model') -> (model', Normal)
         | Ok model'           -> (model', Insert)
-
     end
   end (* Insert *)
 
-  let normal = Normal
+  (* let normal = Normal *)
+  (* let quit   = Quit *)
+  (* let select : t -> (module Modal.Mode) *)
+  (*   = function *)
+  (*   (\* | Normal -> (module Normal : Modal.Mode) *\) *)
+  (*   | _ -> (module Normal : Modal.Mode) *)
 
-  let of_state_mode state = function
-    | Normal -> Normal.Update.of_state state
-    | Insert -> Insert.Update.of_state state
 end
