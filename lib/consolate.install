@@ -93,6 +93,3 @@ lib: [
   "_build/install/default/lib/consolate/consolate.a"
   "_build/install/default/lib/consolate/consolate.cmxs"
 ]
-doc: [
-  "_build/install/default/doc/consolate/README.org"
-]

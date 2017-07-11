@@ -1,6 +1,7 @@
 open Notty
 open Notty_unix
 
+module CT = Consolate_term
 
 module Aux =
 struct
@@ -9,6 +10,7 @@ struct
 end (* Aux *)
 
 
+module Program = struct
 module Model =
 struct
   (** Chars is a slider (a zipper) of unicode chars.
@@ -162,6 +164,7 @@ struct
     in
     I.(front <|> selected <|> back)
 end (* View *)
+end (* Program *)
 
 
 (* TODO Should provide modal interface... *)
@@ -177,6 +180,7 @@ struct
   struct
     (* XXX *)
     exception Unimplemented
+    (* include Modal.Make.Mode.Basis(Program) *)
 
     module Message =
     struct
@@ -211,8 +215,9 @@ struct
     module Update =
     struct
       module Msg = Message
+      open Program
 
-      let of_msg model : Message.t -> Model.t * t = function
+      let of_msg model : Msg.t -> Model.t * t = function
         (* | Msg.Quit -> None *)
         | Msg.End  -> (model, Insert)
         | Msg.Save -> raise Unimplemented
@@ -230,14 +235,14 @@ struct
 
   module Insert =
   struct
-    module Update =
-    struct
-      let of_state ((event, model) as state) =
-        match Update.of_state state with
-        | Error None          -> (model, Normal) (* XXX *)
-        | Error (Some model') -> (model', Normal)
-        | Ok model'           -> (model', Insert)
-    end
+    (* module Update = *)
+    (* struct *)
+    (*   let of_state ((event, model) as state) = *)
+    (*     match Update.of_state state with *)
+    (*     | Error None          -> (model, Normal) (\* XXX *\) *)
+    (*     | Error (Some model') -> (model', Normal) *)
+    (*     | Ok model'           -> (model', Insert) *)
+    (* end *)
   end (* Insert *)
 
   (* let normal = Normal *)
