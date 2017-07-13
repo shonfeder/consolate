@@ -120,8 +120,9 @@ module Program = struct
 
   module Update =
   struct
+    open CT.Flow
     type state  = Consolate_term.event * Model.t
-    type return = (Model.t, Model.t option) result
+    type return = (Model.t, Model.t) CT.Flow.t
 
     (** A blank space must always be at the end of the working model.
         This provides a space for the cursor when it's at the end of
@@ -131,17 +132,17 @@ module Program = struct
     let model_from_msg model : Message.t -> return =
       let open Message in
       function
-      | Esc    -> Error None
-      | Enter  -> Error (Some model)
-      | Code c -> Ok (Model.insert c model)
-      | Del    -> Ok (model |> Model.bwd |> Model.remove)
-      | Bwd    -> Ok (Model.bwd model)
-      | Fwd    -> Ok (Model.fwd model)
+      | Esc    -> halt 0
+      | Enter  -> return model
+      | Code c -> cont (Model.insert c model)
+      | Del    -> cont (model |> Model.bwd |> Model.remove)
+      | Bwd    -> cont (Model.bwd model)
+      | Fwd    -> cont (Model.fwd model)
 
     let of_state : state -> return =
       fun (event, model) ->
         match Message.of_event event with
-        | None     -> Ok model
+        | None     -> cont model
         | Some msg -> model_from_msg model msg
 
     let load : string -> Model.t = Model.of_string

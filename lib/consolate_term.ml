@@ -5,19 +5,24 @@ type event = [ Unescape.event | `Resize of (int * int) | `End ]
 
 (** Program control flow *)
 module Flow = struct
-  type ('a, 'b) t = ('a, 'b option) result
-  let halt : ('a, 'b) t
-    = Error None
+
+  type ('a, 'b) t = Continue of 'a
+                  | Return  of 'b
+                  | Halt of int
+
+  let halt int : ('a, 'b) t
+    = Halt int
   let return : 'b -> ('a, 'b) t
-    = fun x -> Error (Some x)
+    = fun x -> Return x
   let cont : 'a -> ('a, 'b) t
-    = fun x -> Ok x
+    = fun x -> Continue x
 
   module Infix = struct
     let (>>=) : ('a, 'b) t -> ('a -> ('c, 'b) t) -> ('c, 'b) t
       = fun m f -> match m with
-        | Ok a    -> f a
-        | Error b -> Error b
+        | Continue a -> f a
+        | Return b   -> Return b
+        | Halt int   -> Halt int
   end
   include Infix
 
@@ -71,8 +76,6 @@ struct
     (** Basic types and functions *)
     module Basis (Model:Model) (Return:Return) = struct
       type state  = event * Model.t
-      (* TODO Change form result type to custom return type *)
-      (* type ('a, 'b) return = Halt | Cont of 'a | Return of 'b *)
       type return = (Model.t, Return.t) Flow.t
 
       module Flow = Flow
@@ -103,8 +106,9 @@ struct
     let _ = View.of_model model |> Term.image term in
     let state = (Term.event term, model) in
     match Update.of_state state with
-    | Error ret -> ret
-    | Ok model' -> view_update_loop term bg model'
+    | Return ret -> ret
+    | Continue model' -> view_update_loop term bg model'
+    | Halt int -> exit int
 
   let run_from_init init =
     let term = Term.create() in

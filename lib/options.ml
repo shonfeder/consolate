@@ -164,7 +164,7 @@ struct
     let of_esc : Model.t -> return =
       fun model ->
         if Slider.at_first model
-        then Flow.halt
+        then Flow.halt 0
         else Flow.cont (Slider.bwd model)
 
     let of_msg : Model.t -> Message.t -> return =

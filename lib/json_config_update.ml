@@ -1,6 +1,7 @@
 module Return = Json_config_return
 module Model  = Json_config_model
 
+module CT = Consolate_term
 open Model
 
 type msg =
@@ -138,21 +139,21 @@ let message_of_state (event, model) =
   | _ -> (None, model)
 
 let of_message_model (option_msg, model) =
+  let open CT.Flow in
   match option_msg with
-  | Some Quit -> Error None
-  | Some Esc  -> Ok (esc model)
-  | Some Next -> Ok (next model)
-  | Some Prev -> Ok (prev model)
-  | Some Edit -> Ok (edit_model model)
-  | _         -> Ok (model)
+  | Some Quit -> halt 0
+  | Some Esc  -> cont (esc model)
+  | Some Next -> cont (next model)
+  | Some Prev -> cont (prev model)
+  | Some Edit -> cont (edit_model model)
+  | _         -> cont (model)
 
 let init = Model.of_json test_data
 
 let load _ = init
 
-let of_state : state -> (Model.t, Model.t option) result =
+let of_state : state -> return =
   fun state ->
     state
     |> message_of_state
     |> of_message_model
-

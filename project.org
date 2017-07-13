@@ -104,7 +104,6 @@ This is meant to be viewed in an environment that fully supports org-mode.
 ** TODO A modality module
    Compose programs specifying a mode of operation into a modal program
    (all programs involved satisfying the Consolate_term.Program interface)
-*** TODO 
 * Tasks
 ** Change core metaphor ?
    - Model  -> Structure (Struct)

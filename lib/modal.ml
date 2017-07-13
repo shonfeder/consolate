@@ -109,12 +109,12 @@ module Make = struct
           (* TODO: Refactor *)
           (* TODO: Support returns values *)
           match Mode.Update.of_state (event, model) with
-          | Ok    model       -> CT.Flow.cont {mode; model}
-          | Error (Some mode) ->
+          | Continue model -> CT.Flow.cont {mode; model}
+          | Return mode    ->
             if (mode = Program.quit)
-            then CT.Flow.halt
+            then CT.Flow.halt 0
             else CT.Flow.cont {mode; model}
-          | Error None        -> CT.Flow.cont {mode; model}
+          | Halt _ -> CT.Flow.cont {mode; model}
     end
     module View = struct
       open Model

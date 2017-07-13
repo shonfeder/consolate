@@ -1,6 +1,8 @@
 open Notty
 open Notty_unix
 
+module CT = Consolate_term
+
 (* TODO Generalize to deal with multiple components *)
 
 (** A Composer is a [Consolate_term.Program] that uses other
@@ -43,16 +45,17 @@ struct
     let init = Update.init
 
     let compose_result_of_state (event, model) =
+      let open CT.Flow in
       match Composing.selected model with
-      | None          -> Ok model
+      | None          -> Continue model
       | Some selected ->
         let selected' =
           match Component.Update.of_state (event, selected) with
-            | Ok selected'           -> selected'
-            | Error (Some selected') -> selected (* XXX selected' *)
-            | Error None             -> selected
+            | Continue selected' -> selected'
+            | Return selected'   -> selected (* XXX selected' *)
+            | Halt _             -> selected
         in
-        Ok (Composing.replace selected' model)
+        Continue (Composing.replace selected' model)
 
     let of_state : state -> return =
       fun state ->

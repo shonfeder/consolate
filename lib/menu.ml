@@ -200,30 +200,31 @@ struct
   struct
     include CT.Make.Update.Basis (Model) (Return)
     module Msg = Message
+    open CT.Flow
 
     let init = Model.of_menus Menu.menus
     (* TODO parse a string in to a menu *)
 
     let of_selection model : return =
       match Model.selected_item model with
-      | None           -> Error None
-      | Some (Value v) -> Error (Some v)
-      | Some (Menu _)  -> Ok (Model.show_sub_menu model)
+      | None           -> halt 0
+      | Some (Value v) -> return v
+      | Some (Menu _)  -> cont (Model.show_sub_menu model)
 
     let model_of_msg : Model.t -> Message.t -> return =
       fun model -> function
-        | Msg.Close    -> Error None
-        | Msg.Prev     -> Ok (Model.prev_item model)
-        | Msg.Next     -> Ok (Model.next_item model)
-        | Msg.PrevMenu -> Ok (Model.prev_menu model)
-        | Msg.NextMenu -> Ok (Model.next_menu model)
+        | Msg.Close    -> halt 0
+        | Msg.Prev     -> cont (Model.prev_item model)
+        | Msg.Next     -> cont (Model.next_item model)
+        | Msg.PrevMenu -> cont (Model.prev_menu model)
+        | Msg.NextMenu -> cont (Model.next_menu model)
         | Msg.Select   -> of_selection model
 
     let load _ = init
     let of_state : state -> return =
       fun (event, model) ->
         match Msg.of_state (event, model) with
-        | None     -> Ok model
+        | None     -> cont model
         | Some item -> model_of_msg model item
   end
 

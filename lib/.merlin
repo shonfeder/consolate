@@ -1,4 +1,4 @@
-B _build/default
+B ../_build/default/lib
 FLG -open Consolate -w -40
 PKG atd
 PKG atdgen

@@ -1,6 +1,8 @@
 open Notty
 open Notty_unix
 
+module CT = Consolate_term
+
 (* TODO save to file *)
 (* TODO Change file name *)
 
@@ -32,8 +34,8 @@ sig
   module Return : Consolate_term.Return
 
   module Update : sig
-    type state  = Consolate_term.event * Model.t
-    type return = (Model.t, Model.t option) result
+    type state  = CT.event * Model.t
+    type return = (Model.t, Return.t) CT.Flow.t
     val init : Model.t
     val load : string -> Model.t
     val of_state : state -> return
@@ -159,6 +161,8 @@ struct
   struct
     include Consolate_term.Make.Update.Basis (Model) (Return)
 
+    open CT.Flow
+
     let empty_line = LE.Update.init
 
     let init = Slider.singleton empty_line
@@ -206,19 +210,19 @@ struct
     let model_from_msg model : Message.t -> return =
       let open Message in
       function
-      | Quit    -> Error None
-      | Add     -> Ok (add model)
-      | Remove  -> Ok (remove model)
-      | Next    -> Ok (next model)
-      | Prev    -> Ok (prev model)
-      | FwdLine -> Ok (fwd_line model)
-      | BwdLine -> Ok (bwd_line model)
-      | Menu    -> Error None
+      | Quit    -> halt 0
+      | Add     -> cont (add model)
+      | Remove  -> cont (remove model)
+      | Next    -> cont (next model)
+      | Prev    -> cont (prev model)
+      | FwdLine -> cont (fwd_line model)
+      | BwdLine -> cont (bwd_line model)
+      | Menu    -> return None
 
     let of_state : state -> return =
       fun (event, model) ->
         match Message.of_state (event, model) with
-        | None     -> Ok model
+        | None     -> cont model
         | Some msg -> model_from_msg model msg
 
     let load : string -> Model.t = Model.of_file
