@@ -14,8 +14,8 @@ exception Unimplemented
 module Program = struct
   module Model =
   struct
-    (** Chars is a slider (a zipper) of unicode chars.
-        The selected item indicates the currently selected char.*)
+    (** A slider (a zipper) of unicode chars.The selected item indicates the
+        currently selected char. *)
     type t = Uchar.t Slider.t
 
     let init_spacer = Slider.singleton (Uchar.of_char ' ')
@@ -40,7 +40,7 @@ module Program = struct
     let at_end   = Slider.at_last
 
     let to_start = Slider.fbwd
-    let to_end  model = model |> Slider.ffwd |> Slider.bwd
+    let to_end model = model |> Slider.ffwd |> Slider.bwd
 
     let front = Slider.front
     let back  = Slider.back
@@ -174,109 +174,3 @@ module Program = struct
   end (* Modes *)
 
 end (* Program *)
-
-
-(* TODO Should provide modal interface... *)
-module Menu : Modal.Mode
-  with type Model.t  = Program.Model.t
-   and type Return.t = Program.Modes.t  =
-struct
-  include Modal.Make.Mode.Basis (Program)
-
-  module Message =
-  struct
-    type t =
-      | Load
-      | Save
-      | Quit
-      | Insert
-    let of_code code =
-      (* TODO Handle unicode input safely *)
-      try
-        match Uchar.to_char code with
-        | 'l' -> Some Load
-        | 'w' -> Some Save
-        | 'q' -> Some Quit
-        | 'i' -> Some Insert
-        | _   -> None
-      with
-        Invalid_argument _ ->
-        match Uchar.to_int code with
-        | _ -> None
-
-    let of_key = function
-      | `Uchar code -> of_code code
-      | `Escape     -> Some Insert
-      | _           -> None
-
-    let of_event : Consolate_term.event -> t option = function
-      | `Key (key, _) -> of_key key
-      | _ -> None
-  end (* Message *)
-
-  module Update = struct
-    include Update_basis
-    module Msg = Message
-
-    let of_msg model : Msg.t -> return = function
-      (* | Msg.Quit -> None *)
-      | Msg.Insert -> CT.Flow.return Program.Modes.Insert
-      | Msg.Save -> raise Unimplemented
-      | Msg.Load -> raise Unimplemented
-      | _ -> raise Unimplemented
-    (* | _ -> TODO Deal with quiting...  *)
-
-    let of_state : state -> return =
-      fun (event, model) ->
-        match Msg.of_event event with
-        | Some msg -> of_msg model msg
-        | None     -> CT.Flow.cont model
-  end
-end (* Normal *)
-
-module Normal : Modal.Mode
-  with type Model.t  = Program.Model.t
-   and type Return.t = Program.Modes.t  =
-struct
-  include Modal.Make.Mode.Basis (Program)
-  module Update = struct
-    include Update_basis
-    let of_state : state -> return =
-      fun _ -> CT.Flow.halt
-  end
-end (* Insert *)
-
-(* module Insert = *)
-(* struct *)
-(*   (\* module Update = *\) *)
-(*   (\* struct *\) *)
-(*   (\*   let of_state ((event, model) as state) = *\) *)
-(*   (\*     match Update.of_state state with *\) *)
-(*   (\*     | Error None          -> (model, Normal) (\\* XXX *\\) *\) *)
-(*   (\*     | Error (Some model') -> (model', Normal) *\) *)
-(*   (\*     | Ok model'           -> (model', Insert) *\) *)
-(*   (\* end *\) *)
-(* end (\* Insert *\) *)
-
-(* let normal = Normal *)
-(* let quit   = Quit *)
-(* let select : t -> (module Modal.Mode) *)
-(*   = function *)
-(*   (\* | Normal -> (module Normal : Modal.Mode) *\) *)
-(*   | _ -> (module Normal : Modal.Mode) *)
-
-module ModalProgram : Modal.T = struct
-  include Program
-  let quit   = Modes.Quit
-  let normal = Modes.Normal
-  let select = function
-    | Modes.Insert -> (module Normal : Modal.Mode
-                        with type Model.t = Model.t
-                         and type Return.t = Modes.t)
-    | Modes.Normal -> (module Menu)
-    | _ -> raise Unimplemented
-    (* | Modes.Quit   -> (module Normal) *)
-    (* | _      -> (module Normal) *)
-end
-
-module Modal = Modal.Make.Modal (ModalProgram)
