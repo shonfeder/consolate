@@ -1,0 +1,23 @@
+digraph Program {
+  label = "An Interactive Terminal Program";
+  rankdir = "LR";
+
+  Event    [label = <Event <br/> <font point-size="10">Notty_terminal.event</font>>];
+  State    [label = <State <br/> <font point-size="10">Model * Event</font>>];
+  ToUpdate [label = "Message * Model"]
+
+  subgraph cluster_Mode {
+    label = "A Mode";
+    style = filled;
+    color = lightgrey;
+
+    Model    -> UI [label = "View"];
+    ToUpdate -> Model [label = "Update"];
+  }
+
+  State -> ToUpdate [label = "interpret event as Message", weight = 3];
+  Model -> State [label = "updated model", style = dotted];
+  UI    -> Event [label = "user action", weight = 4];
+  Event -> State [label = "input"];
+
+}
