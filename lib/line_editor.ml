@@ -9,6 +9,7 @@ struct
     BatList.take (List.length list - 1) list
 end (* Aux *)
 
+exception Unimplemented
 
 module Program = struct
   module Model =
@@ -176,88 +177,106 @@ end (* Program *)
 
 
 (* TODO Should provide modal interface... *)
-module Modes =
+module Menu : Modal.Mode
+  with type Model.t  = Program.Model.t
+   and type Return.t = Program.Modes.t  =
 struct
+  include Modal.Make.Mode.Basis (Program)
 
-  type t =
-    | Normal
-    | Insert
-    | Quit
-
-  module Normal =
+  module Message =
   struct
-    (* XXX *)
-    exception Unimplemented
-    (* include Modal.Make.Mode.Basis(Program) *)
-
-    module Message =
-    struct
-      type t =
-        | Load
-        | Save
-        | Quit
-        | End
-      let of_code code =
-        (* TODO Handle unicode input safely *)
-        try
-          match Uchar.to_char code with
-          | 'l' -> Some Load
-          | 'w' -> Some Save
-          | 'q' -> Some Quit
-          | _   -> None
-        with
-          Invalid_argument _ ->
-          match Uchar.to_int code with
-          | _ -> None
-
-      let of_key = function
-        | `Uchar code -> of_code code
-        | `Escape     -> Some End
-        | _           -> None
-
-      let of_event : Consolate_term.event -> t option = function
-        | `Key (key, _) -> of_key key
+    type t =
+      | Load
+      | Save
+      | Quit
+      | Insert
+    let of_code code =
+      (* TODO Handle unicode input safely *)
+      try
+        match Uchar.to_char code with
+        | 'l' -> Some Load
+        | 'w' -> Some Save
+        | 'q' -> Some Quit
+        | 'i' -> Some Insert
+        | _   -> None
+      with
+        Invalid_argument _ ->
+        match Uchar.to_int code with
         | _ -> None
-    end (* Message *)
 
-    module Update =
-    struct
-      module Msg = Message
-      open Program
+    let of_key = function
+      | `Uchar code -> of_code code
+      | `Escape     -> Some Insert
+      | _           -> None
 
-      let of_msg model : Msg.t -> Model.t * t = function
-        (* | Msg.Quit -> None *)
-        | Msg.End  -> (model, Insert)
-        | Msg.Save -> raise Unimplemented
-        | Msg.Load -> raise Unimplemented
-        | _ -> (model, Normal)
-        (* | _ -> TODO Deal with quiting...  *)
+    let of_event : Consolate_term.event -> t option = function
+      | `Key (key, _) -> of_key key
+      | _ -> None
+  end (* Message *)
 
-      let of_state : Update.state -> (Model.t * t) =
-        fun (event, model) ->
-          match Msg.of_event event with
-          | Some msg -> of_msg model msg
-          | None     -> (model, Normal)
-    end
-  end (* Normal *)
+  module Update = struct
+    include Update_basis
+    module Msg = Message
 
-  module Insert =
-  struct
-    (* module Update = *)
-    (* struct *)
-    (*   let of_state ((event, model) as state) = *)
-    (*     match Update.of_state state with *)
-    (*     | Error None          -> (model, Normal) (\* XXX *\) *)
-    (*     | Error (Some model') -> (model', Normal) *)
-    (*     | Ok model'           -> (model', Insert) *)
-    (* end *)
-  end (* Insert *)
+    let of_msg model : Msg.t -> return = function
+      (* | Msg.Quit -> None *)
+      | Msg.Insert -> CT.Flow.return Program.Modes.Insert
+      | Msg.Save -> raise Unimplemented
+      | Msg.Load -> raise Unimplemented
+      | _ -> raise Unimplemented
+    (* | _ -> TODO Deal with quiting...  *)
 
-  (* let normal = Normal *)
-  (* let quit   = Quit *)
-  (* let select : t -> (module Modal.Mode) *)
-  (*   = function *)
-  (*   (\* | Normal -> (module Normal : Modal.Mode) *\) *)
-  (*   | _ -> (module Normal : Modal.Mode) *)
+    let of_state : state -> return =
+      fun (event, model) ->
+        match Msg.of_event event with
+        | Some msg -> of_msg model msg
+        | None     -> CT.Flow.cont model
+  end
+end (* Normal *)
 
+module Normal : Modal.Mode
+  with type Model.t  = Program.Model.t
+   and type Return.t = Program.Modes.t  =
+struct
+  include Modal.Make.Mode.Basis (Program)
+  module Update = struct
+    include Update_basis
+    let of_state : state -> return =
+      fun _ -> CT.Flow.halt
+  end
+end (* Insert *)
+
+(* module Insert = *)
+(* struct *)
+(*   (\* module Update = *\) *)
+(*   (\* struct *\) *)
+(*   (\*   let of_state ((event, model) as state) = *\) *)
+(*   (\*     match Update.of_state state with *\) *)
+(*   (\*     | Error None          -> (model, Normal) (\\* XXX *\\) *\) *)
+(*   (\*     | Error (Some model') -> (model', Normal) *\) *)
+(*   (\*     | Ok model'           -> (model', Insert) *\) *)
+(*   (\* end *\) *)
+(* end (\* Insert *\) *)
+
+(* let normal = Normal *)
+(* let quit   = Quit *)
+(* let select : t -> (module Modal.Mode) *)
+(*   = function *)
+(*   (\* | Normal -> (module Normal : Modal.Mode) *\) *)
+(*   | _ -> (module Normal : Modal.Mode) *)
+
+module ModalProgram : Modal.T = struct
+  include Program
+  let quit   = Modes.Quit
+  let normal = Modes.Normal
+  let select = function
+    | Modes.Insert -> (module Normal : Modal.Mode
+                        with type Model.t = Model.t
+                         and type Return.t = Modes.t)
+    | Modes.Normal -> (module Menu)
+    | _ -> raise Unimplemented
+    (* | Modes.Quit   -> (module Normal) *)
+    (* | _      -> (module Normal) *)
 end
+
+module Modal = Modal.Make.Modal (ModalProgram)
