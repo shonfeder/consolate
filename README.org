@@ -22,7 +22,6 @@
 
    The aim is to develop a deeply modular, declarative, extensible, suite for
    developing terminal tools.
-
 ** Specifically
 
    The following features are in various stages of early development, and should
@@ -33,11 +32,17 @@
      satisfying the ~Program~ interface.
    - The ~Composition~ functor, facilitating the composition of complex programs
      from simpler, independent components.
+   - The ~Modal~ module, providing modules for creating modal programs (ala
+     Vim/Spacemacs) on the basis of an existing program.
    - A simple line editor.
    - A simple text editor, implemented as a composer on the simple line editor.
    - A terminal application that treats JSON files as config files and
      facilitates structured, easy, safe editing of values without risk to the
      syntax or semantics of the configuration framework. In early development.
+
+*** Current working architecture of a program
+
+   [[file:resources/a_program.png]]
 
 * Eventually?
 
