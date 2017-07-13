@@ -1,23 +1,83 @@
 digraph Program {
-  label = "An Interactive Terminal Program";
-  rankdir = "LR";
+  splines = ortho;
+  
+  {rank = same UI, Image, Update};
+  {rank = source View, Motive}
+  {rank = source State}
+  newrank = true;
 
-  Event    [label = <Event <br/> <font point-size="10">Notty_terminal.event</font>>];
-  State    [label = <State <br/> <font point-size="10">Model * Event</font>>];
-  ToUpdate [label = "Message * Model"]
-
-  subgraph cluster_Mode {
-    label = "A Mode";
+  subgraph cluster_External {
+    // Style
+    label = "External World";
+    labeljust = "l";
     style = filled;
-    color = lightgrey;
+    color = lightblue;
 
-    Model    -> UI [label = "View"];
-    ToUpdate -> Model [label = "Update"];
+    // Nodes
+    {rank = same UI, User};
+    UI;
+    User;
+
+    // Edges
+    User -> UI [label = "interaction", dir = both];
   }
 
-  State -> ToUpdate [label = "interpret event as Message", weight = 3];
-  Model -> State [label = "updated model", style = dotted];
-  UI    -> Event [label = "user action", weight = 4];
-  Event -> State [label = "input"];
+  subgraph cluster_WHat {
+    subgraph cluster_Thing {
+      label = "???";
+      labeljust = "r";
+      style = filled;
+      color = pink;
+      Update [color = red];
+      Image   [label = <Image   <br/> <font point-size="10">Notty.image</font>>];
+    }
 
+    subgraph cluster_Mode {
+      // Style
+      label = "Mode";
+      labeljust = "r";
+      style = filled;
+      color = lightgrey;
+
+      // Nodes
+      {rank = same View, Motive};
+      Motive  [label = <Motive  <br/> <font point-size="10">Message.t * State.t</font>>];
+      View
+    }
+  }
+
+  subgraph cluster_CoreProgram {
+    // Style
+    label = "Core Program";
+    labeljust = "l";
+
+    // Nodes
+    // {rank = same Event, Impetus, State}
+    State   [label = <State   <br/> <font point-size="10">Model.t * Mode.t</font>>, color = blue];
+    Impetus [label = <Impetus <br/> <font point-size="10">Event.t * State.t</font>>];
+    Event   [label = <Event   <br/> <font point-size="10">Notty_terminal.event</font>>];
+
+    // Edges
+    Event   -> Impetus  [xlabel = "stimulation", weight = 10];
+    State   -> Impetus  [style = dashed];
+  }
+  
+  // Thing -> Core Program
+  Update -> State [label = "change", color = red]
+
+  // Thing -> External World
+  Image -> UI [xlabel = "presentation"]
+
+  // Core Program -> Mode
+  Impetus -> Motive [xlabel = "interpretation"];
+  State  -> View [xlabel = "perspective", color = blue];
+
+  // Mode -> Thing
+  Motive -> Update [xlabel = "action"];
+  View   -> Image [xlabel = "rendering"];
+
+  // Exteranl World -> Core Program
+  UI      -> Event [xlabel = "input"];
+
+  label = "A Modal Interactive Terminal Program";
 }

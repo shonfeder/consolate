@@ -40,9 +40,9 @@
      facilitates structured, easy, safe editing of values without risk to the
      syntax or semantics of the configuration framework. In early development.
 
-*** Current working architecture of a program
+*** Planned architecture of a modal program
 
-   [[file:resources/a_program.png]]
+   [[file:resources/modality.png]]
 
 * Eventually?
 
