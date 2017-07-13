@@ -32,7 +32,7 @@ end
 
 (** The type of a program that can be turned into a modal program satisfying the
     CT.Program interface. *)
-module type Modal = sig
+module type T = sig
   include With_modes
   (** [normal] is the [Mode.t] in which the underlying program defaults to its
       original behavior. *)
@@ -54,7 +54,12 @@ module Make = struct
 
     (** Construct the basic elements of a program satisfying [Mode] given a
         program with a module of modes. *)
-    module Basis (Program:With_modes) : Mode_basis = struct
+    module Basis
+        (Program:With_modes)
+      : Mode_basis
+        with type Model.t = Program.Model.t
+         and type Return.t = Program.Modes.t
+    = struct
       module Model  = Program.Model
       module Return = struct type t = Program.Modes.t end
       module View = Program.View
@@ -65,8 +70,7 @@ module Make = struct
 
           [of_state] is responsible for providing the model changes in
           response to input events, as well as determining which other
-          modes can be transitioned.
-      *)
+          modes can be transitioned. *)
       module Update_basis = struct
         include CT.Make.Update.Basis (Model) (Return)
         let init : Model.t = Program.Update.init
@@ -82,7 +86,7 @@ module Make = struct
       program's model is delegated to the appropriate mode module.
 
       XXX: Normal mode should default to the core of the Program:With_modes? *)
-  module Modal (Program:Modal) : CT.Program =
+  module Modal (Program:T) : CT.Program =
   struct
     module Model  = struct
       type t = { mode  : Program.Modes.t
