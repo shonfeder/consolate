@@ -2,10 +2,15 @@
 
 This is meant to be viewed in an environment that fully supports org-mode.
 
+* Tasks
+** Change core metaphor ?
+   - Model  -> Structure (Struct)
+   - Update -> Transformation (Trans)
+   - View   -> Representation (Rep)
 * Module Terminal Widgets
 ** Text editor
 *** TODO Integrate Menu.
-*** TODO Add integrated loading from/saving to file.
+*** TODO Add integrated loading-from/saving-to file.
 ** Menu
 *** TODO Use unicode box drawing for display
     https://en.wikipedia.org/wiki/Box-drawing_character
@@ -19,9 +24,18 @@ This is meant to be viewed in an environment that fully supports org-mode.
 *** TODO Write up results of study
 ** File browser
    A tree of Menus.
+*** TODO Generate a menu with a dirs contents
 *** TODO Return file name after browsing
 *** TODO Change base directory
 *** TODO Create directory
+*** TODO Generalize to ('a -> 'a item CharMap.t)
+
+    [2017-07-17]
+    [[file:~/Dropbox/Programming/ocaml/consolate/lib/options.ml::and%20'a%20choice%20=]]
+*** TODO Use generalized choice type, once implemented
+
+    [2017-07-17]
+    [[file:~/Dropbox/Programming/ocaml/consolate/lib/browser.ml::then%20Opts.opt%20file_name%20(Dir%20opts_of_dir)]]
 ** Composition
 *** TODO System for passing control over to sub-components.
 ** Modal
@@ -104,11 +118,6 @@ This is meant to be viewed in an environment that fully supports org-mode.
 ** TODO A modality module
    Compose programs specifying a mode of operation into a modal program
    (all programs involved satisfying the Consolate_term.Program interface)
-* Tasks
-** Change core metaphor ?
-   - Model  -> Structure (Struct)
-   - Update -> Transformation (Trans)
-   - View   -> Representation (Rep)
 * Goals
 ** TODO Package as Opam package
 ** TODO Package as standalone for Ubuntu?
