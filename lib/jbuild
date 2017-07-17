@@ -4,11 +4,12 @@
  ((name consolate)
   (public_name consolate)
   (libraries (atdgen
+              base
               batteries
-              ppx_deriving
-              ppx_deriving.std
               extlib
               fileutils
               notty
               notty.unix
+              ppx_deriving
+              ppx_deriving.std
               yojson))))

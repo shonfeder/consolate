@@ -2,6 +2,9 @@ B ../_build/default/lib
 FLG -open Consolate -w -40
 PKG atd
 PKG atdgen
+PKG base
+PKG base.caml
+PKG base.shadow_stdlib
 PKG batteries
 PKG bigarray
 PKG biniou
@@ -31,6 +34,7 @@ PKG ppx_deriving.show
 PKG ppx_deriving.std
 PKG ppx_tools
 PKG result
+PKG sexplib.0
 PKG str
 PKG threads
 PKG threads.posix
