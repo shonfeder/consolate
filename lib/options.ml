@@ -9,19 +9,20 @@ let find = CharMap.Exceptionless.find
 
 module type Opts =
 sig
+  (* Designed following Joseph Goguen's program for algebraic semiotics. *)
 
-  (* Lvl 4 *)
+  (* Lvl 4 : "Atomic" Types *)
   type name        = string
   type description = string option
   type selector    = char
 
-  (* Lvl 3 *)
+  (* Lvl 3 : "Molecular" Type *)
   type 'a opt =
     { name        : name
     ; thing       : 'a
     ; description : description }
 
-  (* Lvl 2 *)
+  (* Lvl 2 : "Cellular" Types *)
   type 'a opts =
     { title : name
     ; opts  : 'a choice}
@@ -31,17 +32,20 @@ sig
     | Opt  of 'a opt
     | Opts of 'a opts
 
-  (* Lvl 1 *)
+  (* Lvl 1 : "Organism" Type *)
   type 'a t = 'a opts
 
+  (* Constructors *)
+  val opt  : ?description:string -> name -> 'a -> 'a item
+  val opts : name -> 'a choice -> 'a item
+
+  (* Accessors *)
   val opts_items : 'a t -> 'a choice
   val opts_title : 'a t -> name
 
+  (* Converter *)
   val of_assoc : string -> (selector * 'a item) list -> 'a choice
   val of_opts  : string -> (selector * 'a item) list -> 'a opts
-
-  val opt  : ?description:string -> name -> 'a -> 'a item
-  val opts : name -> 'a choice -> 'a item
 end
 
 

@@ -1,6 +1,10 @@
 lib: [
   "_build/install/default/lib/consolate/META" {"META"}
   "_build/install/default/lib/consolate/opam" {"opam"}
+  "_build/install/default/lib/consolate/consolate__Browser.cmi"
+  "_build/install/default/lib/consolate/consolate__Browser.cmx"
+  "_build/install/default/lib/consolate/consolate__Browser.cmt"
+  "_build/install/default/lib/consolate/browser.ml"
   "_build/install/default/lib/consolate/consolate__Composition.cmi"
   "_build/install/default/lib/consolate/consolate__Composition.cmx"
   "_build/install/default/lib/consolate/consolate__Composition.cmt"
