@@ -7,73 +7,36 @@ module CT = Consolate_term
 module CharMap = BatMap.Make (Char)
 let find = CharMap.Exceptionless.find
 
-module type Opts =
-sig
-  (* Designed following Joseph Goguen's program for algebraic semiotics. *)
-
-  (* Lvl 4 : "Atomic" Types *)
-  type name        = string
-  type description = string option
-  type selector    = char
-
-  (* Lvl 3 : "Molecular" Type *)
-  type 'a opt =
-    { name        : name
-    ; thing       : 'a
-    ; description : description }
-
-  (* Lvl 2 : "Cellular" Types *)
-  type 'a opts =
-    { title : name
-    ; opts  : 'a choice}
-  and 'a choice =
-    'a item CharMap.t
-  and 'a item =
-    | Opt  of 'a opt
-    | Opts of 'a opts
-
-  (* Lvl 1 : "Organism" Type *)
-  type 'a t = 'a opts
-
-  (* Constructors *)
-  val opt  : ?description:string -> name -> 'a -> 'a item
-  val opts : name -> 'a choice -> 'a item
-
-  (* Accessors *)
-  val opts_items : 'a t -> 'a choice
-  val opts_title : 'a t -> name
-
-  (* Converter *)
-  val of_assoc : string -> (selector * 'a item) list -> 'a choice
-  val of_opts  : string -> (selector * 'a item) list -> 'a opts
-end
+(* module type Opts = *)
+(* sig *)
+(* TODO *)
+(* end *)
 
 
 module Opts =
 struct
 
-  (* Lvl 5 *)
+  (* Lvl 5: Element *)
   type name        = string
   type description = string option
   type selector    = char
 
-  (* Lvl 4 *)
+  (* Lvl 4: Compound *)
   type 'a opt =
     { name        : name
     ; thing       : 'a
     ; description : description }
 
-  (* Lvl 3 *)
+  (* Lvl 3: Connection *)
   and 'a opts =
     { title : name
     ; opts  : 'a choice}
   and 'a item =
     | Opt  of 'a opt
     | Opts of 'a opts
-  (* Lvl 2 *)
   and 'a choice = 'a item CharMap.t
 
-  (* Lvl 1 *)
+  (* Lvl 4: Composition *)
   type 'a t = 'a opts
 
   let opts_items : 'a t -> 'a choice
@@ -155,9 +118,10 @@ struct
       fun selector model ->
         let open Opts in
         let update =
-          Slider.select model >>=
-          fun opts -> Some (Opts.opts_items opts) >>=
-          find selector       >>= function
+          Slider.select model
+          >>= fun opts -> Some (Opts.opts_items opts)
+          >>= find selector
+          >>= function
           | Opt opt   -> Some (Flow.return opt.thing)
           | Opts opts -> Some (Slider.fwd model
                                |> Slider.insert opts
