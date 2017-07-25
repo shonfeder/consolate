@@ -9,4 +9,4 @@ module Menu_test   = Loop(Menu.Make(Menu.Test))
 
 module Options_test = Loop(Options.Make(Options.Test))
 
-module Browser_test = Loop(Browser.Program)
+module Browser_test = Loop(Browse.Program)

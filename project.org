@@ -28,10 +28,7 @@ This is meant to be viewed in an environment that fully supports org-mode.
 *** TODO Return file name after browsing
 *** TODO Change base directory
 *** TODO Create directory
-*** TODO Generalize to ('a -> 'a item CharMap.t)
-
-    [2017-07-17]
-    [[file:~/Dropbox/Programming/ocaml/consolate/lib/options.ml::and%20'a%20choice%20=]]
+*** TODO Opts.choice should be a suspension
 *** TODO Use generalized choice type, once implemented
 
     [2017-07-17]
