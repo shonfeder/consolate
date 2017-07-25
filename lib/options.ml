@@ -34,33 +34,58 @@ struct
   and 'a item =
     | Opt  of 'a opt
     | Opts of 'a opts
-  and 'a choice = 'a item CharMap.t
+  and 'a choice = unit -> 'a item CharMap.t
 
   (* Lvl 4: Composition *)
   type 'a t = 'a opts
 
-  let opts_items : 'a t -> 'a choice
-    = fun opts -> opts.opts
+  (** Applies forces the choices, to return the available selection *)
+  let opts_items
+    : 'a t -> 'a item CharMap.t
+    = fun opts -> (opts.opts ())
 
-  let opts_title : 'a t -> name
+  let opts_title
+    : 'a t -> name
     = fun opts -> opts.title
 
-  let of_assoc : string -> (selector * 'a item) list -> 'a opts
-    = fun title assoc ->
-    let add_item (selector, item) choice =
-      CharMap.add selector item choice
-    in
-    let opts = List.fold_right add_item assoc CharMap.empty in
-    {title; opts}
+  let empty_choice
+    : 'a item CharMap.t
+    = CharMap.empty
 
-  let of_opts  : string -> (selector * 'a item) list -> 'a item
+  let choices_of_assoc
+    : (selector * 'a item) list -> 'a item CharMap.t
+    = fun assoc ->
+      let add_item (selector, item) choice =
+        CharMap.add selector item choice
+      in
+      List.fold_right add_item assoc CharMap.empty
+
+  let of_choice
+    : name -> 'a choice  -> 'a t
+    = fun title opts -> {title; opts}
+
+  let of_assoc
+    : string -> (selector * 'a item) list -> 'a opts
+    = fun title assoc ->
+      let add_item (selector, item) choice =
+        CharMap.add selector item choice
+      in
+      let opts () = List.fold_right add_item assoc CharMap.empty in
+      {title; opts}
+
+  let of_opts
+    : string -> (selector * 'a item) list -> 'a item
     = fun string assoc ->
       Opts (of_assoc string assoc)
 
-  let opt ?description name thing : 'a item =
-    Opt {name; thing; description}
-  let opts title opts : 'a item =
-    Opts {title; opts}
+  let opt
+    : ?description:string -> name -> 'a -> 'a item
+    = fun ?description name thing ->
+      Opt {name; thing; description}
+  let opts
+    : name -> 'a choice -> 'a item
+    = fun title opts ->
+      Opts {title; opts}
 end
 
 module type Menu_spec =
@@ -176,11 +201,11 @@ struct
     let of_opts
       : ?rows:int -> Menu.t Opts.t -> Notty.image
       = fun ?(rows=10) opts ->
-
+        let choices = (Opts.opts_items opts)
+        in
         let add_column : Notty.image * Notty.image -> Notty.image
           = fun (column, columns) -> I.(columns <|> pad ~r:2 column)
         in
-
         let arrange : char -> Menu.t Opts.item
           -> Notty.image * Notty.image
           -> Notty.image * Notty.image
@@ -191,7 +216,7 @@ struct
             else item_img, add_column (column, columns)
         in
         (I.empty, I.empty)
-        |> CharMap.fold arrange opts.opts
+        |> CharMap.fold arrange choices
         |> add_column
 
     let bread_crumbs_of_model : Model.t -> Notty.image
