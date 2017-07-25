@@ -24,6 +24,7 @@ PKG findlib.top
 PKG lambda-term
 PKG lwt
 PKG lwt.log
+PKG lwt.react
 PKG lwt.unix
 PKG lwt_react
 PKG notty
